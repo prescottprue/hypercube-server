@@ -1,4 +1,4 @@
-angular.module('hypercube.users')
+angular.module('hypercubeServer.users')
 .controller('UsersCtrl', ['$scope', '$http', 'usersService', function($scope, $http, usersService){
 		$scope.data = {
 			loading:true,

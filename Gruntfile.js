@@ -1,4 +1,6 @@
 module.exports = function(grunt){
+	var serverFolder = "backend/";
+	var frontFolder = "public/";
 	grunt.initConfig({
 		concurrent:{
 			tasks:['watch','nodemon'],
@@ -6,7 +8,7 @@ module.exports = function(grunt){
 		},
 		watch:{
 			server:{
-				files:['Gruntfile.js', 'config/**', 'lib/**', 'controllers/**'],
+				files:['Gruntfile.js', 'config/**', serverFolder + 'lib/**', serverFolder + 'controllers/**'],
 				tasks:['nodemon']
 			}
 		},
@@ -18,8 +20,8 @@ module.exports = function(grunt){
 		},
 		apidoc: {
 			app:{
-				src: "controllers",
-	    	dest: "public/docs/",
+				src: serverFolder+ "controllers",
+	    	dest: frontFolder + "docs/",
 	    	options:{
 	    		debug:true
 	    	}

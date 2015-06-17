@@ -1,1 +1,1 @@
-angular.module('hypercubeServer.nav', ['hypercube.auth'])
+angular.module('hypercubeServer.nav', ['hypercubeServer.auth'])

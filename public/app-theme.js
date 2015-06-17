@@ -1,4 +1,4 @@
-angular.module('hypercube')
+angular.module('hypercubeServer')
 .config(function($mdThemingProvider) {
   $mdThemingProvider.theme('default')
     .primaryPalette('blue')

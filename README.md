@@ -1,6 +1,6 @@
 # [Hypercube-Server](http://hyper-cube.herokuapp.com)
 
-This repo is the **SERVER* for [Hypercube]() and the Hypercube API. If you are just looking to use the Hypercube application to develop applications in the browser, please visit [hyper-cube.herokuapp.com](http://hyper-cube.herokuapp.com).
+This repo is the **SERVER** for [Hypercube]() and the Hypercube API. If you are just looking to use the Hypercube application to develop applications in the browser, please visit [hyper-cube.s3.com](http://hyper-cube.herokuapp.com).
 
 ## Getting Started
 
@@ -61,10 +61,5 @@ List and detail views/controllers for applications
 Login and Signup pages.
 
 ## TODO
-
+* Change Password route
 * App Name Middleware to handle app specific requests
-* $log decorator
-* Angular Plugin
-* Getting Started guide for Angular plugin
-* React Plugin
-* Getting Started guide for React plugin

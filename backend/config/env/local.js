@@ -3,5 +3,5 @@ module.exports = {
 		url:"localhost:27017",
 		name:"hypercube"
 	},
-	jwtSecret:process.env.HYPERCUBE_JWT_SECRET
+	jwtSecret:"shhhhhhh"
 };
