@@ -9,7 +9,9 @@ angular.module('hypercubeServer', [
     'hypercubeServer.nav',
     'hypercubeServer.home', 
     'hypercubeServer.roles', 
-    'hypercubeServer.users'
+    'hypercubeServer.users',
+    'hypercubeServer.applications'
+
   ])
 
 .directive('stopEvent', function () {

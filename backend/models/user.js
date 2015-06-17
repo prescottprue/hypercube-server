@@ -19,7 +19,7 @@ var UserSchema = new mongoose.Schema(
 		email:{type: String, default:'', index:true},
 		title:{type: String, default:''},
 		password:{type: String, default:''},
-		role:{type: String, default:''},
+		role:{type: String, default:'user'},
 		sessionId:{type:String},
 		createdAt: { type: Date, default: Date.now, index: true},
 		updatedAt: { type: Date, default: Date.now, index: true}

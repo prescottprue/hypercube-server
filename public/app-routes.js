@@ -28,28 +28,28 @@ angular.module('hypercubeServer')
       parent:'nav',
       url:'/users',
       authorizedRoles:[USER_ROLES.admin, USER_ROLES.editor, USER_ROLES.user],
-      templateUrl:'user/users.html',
+      templateUrl:'users/users.html',
       controller:'UsersCtrl'
     })
     .state('user', {
       parent:'nav',
       url:'/user/:username',
       authorizedRoles:[USER_ROLES.admin, USER_ROLES.editor, USER_ROLES.user],
-      templateUrl:'user/user.html',
+      templateUrl:'users/user.html',
       controller:'UserCtrl'
     })
     .state('apps', {
       parent:'nav',
       url:'/apps',
       authorizedRoles:[USER_ROLES.admin, USER_ROLES.editor, USER_ROLES.user],
-      templateUrl:'application/applications.html',
+      templateUrl:'applications/applications.html',
       controller:'ApplicationsCtrl'
     })
     .state('app', {
       parent:'nav',
       url:'/apps/:name',
       authorizedRoles:[USER_ROLES.admin, USER_ROLES.editor, USER_ROLES.user],
-      templateUrl:'application/application.html',
+      templateUrl:'applications/application.html',
       controller:'ApplicationCtrl'
     })
     .state('roles', {
