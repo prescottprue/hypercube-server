@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var _ = require('underscore');
 var jwt = require('express-jwt');
 var config = require('./backend/config/default').config;
-
+var cors = require('cors');
 
 var routes = require('./backend/config/routes');
 var app = express();
@@ -34,9 +34,11 @@ console.log('config:', config);
 //Protect all routes by requiring Authorization header
 app.use(jwt({secret: config.jwtSecret}).unless({path:allowedPaths}));
 
+// app.use('/', routes);
+app.use(cors())
 //Setup routes based on config
 routeBuilder(routes);
-// app.use('/', routes);
+
 //Log Errors before they are handled
 app.use(function (err, req, res, next) {
   console.log(err.message, req.originalUrl);

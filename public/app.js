@@ -11,7 +11,9 @@ angular.module('hypercubeServer', [
     'hypercubeServer.roles', 
     'hypercubeServer.users'
   ])
-
+    .config(function ($httpProvider) {
+        delete $httpProvider.defaults.headers.common['X-Requested-With'];
+    });
 .directive('stopEvent', function () {
   return {
     restrict: 'A',
