@@ -1,0 +1,27 @@
+<md-content>
+    <md-card>
+      <md-card-content>
+         <md-content layout-padding layout="column" layout-sm="column" layout-align="center">
+         <form>
+          <div flex>
+            <md-input-container>
+              <label>Username or Email</label>
+              <input ng-model="loginForm.username" type="text">
+            </md-input-container>
+            <md-input-container>
+              <label>Password</label>
+              <input ng-model="loginForm.password" type="password">
+            </md-input-container>
+          </div>
+          <section layout="row" layout-sm="column" layout-align="center center">
+            <md-button class="md-raised" ng-click="login()" aria-label="Login"  type="submit">
+              <span ng-if="!loginForm.loading">Login</span>
+              <!-- <i class="fa fa-circle-o-notch fa-spin" ng-if="loginForm.loading"></i> -->
+               <!-- <md-progress-circular md-mode="indeterminate"></md-progress-circular> -->
+            </md-button>
+          </section>
+        </md-content>
+        </form>
+      </md-card-content>
+    </md-card>
+  </md-content>

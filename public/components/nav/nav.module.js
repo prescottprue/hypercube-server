@@ -1,0 +1,1 @@
+angular.module('hypercubeServer.nav', ['hypercube.auth'])

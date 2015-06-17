@@ -1,0 +1,1 @@
+angular.module('hypercubeServer.account', ['ui.router', 'hypercubeServer.auth'])

@@ -1,0 +1,33 @@
+{
+  "name": "hypercubeServer",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "bcrypt": "^0.8.3",
+    "body-parser": "~1.12.4",
+    "cookie-parser": "~1.3.5",
+    "debug": "~2.2.0",
+    "ejs": "^2.3.1",
+    "express": "~4.12.4",
+    "express-jwt": "^3.0.1",
+    "jade": "~1.9.2",
+    "jsonwebtoken": "^5.0.1",
+    "mongoose": "^4.0.4",
+    "morgan": "~1.5.3",
+    "q": "^1.4.1",
+    "serve-favicon": "~2.2.1",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-apidoc": "^0.10.1",
+    "grunt-concurrent": "^1.0.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-nodemon": "^0.4.0",
+    "load-grunt-tasks": "^3.2.0",
+    "nodemon": "^1.3.7"
+  }
+}
