@@ -26,8 +26,22 @@ module.exports = function(grunt){
 	    		debug:true
 	    	}
 			}
+		},
+		shell: {
+    	mongodb: {
+      	command: 'mongod --dbpath /data/db',
+      	options: {
+          async: true,
+          stdout: false,
+          stderr: true,
+          failOnError: true,
+          execOptions: {
+            cwd: '.'
+          }
+      	}
+  		}
 		}
 	});
 	require('load-grunt-tasks')(grunt);
-	grunt.registerTask('default', ['nodemon']);
+	grunt.registerTask('default', ['shell:mongodb', 'nodemon']);
 };
