@@ -1,7 +1,7 @@
 module.exports = {
 	db:{
 		url:"localhost:27017",
-		name:"hypercube"
+		name:"test"
 	},
 	jwtSecret:"shhhhhhh"
 };

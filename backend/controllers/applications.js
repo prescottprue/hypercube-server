@@ -60,26 +60,32 @@ exports.get = function(req, res, next){
  */
 exports.add = function(req, res, next){
 	//Query for existing application with same _id
-	console.log('add request with name: ' + req.params.name + ' with body:', req.body);
-	var query = Application.findOne({"name":req.params.name}); // find using name field
-	query.exec(function (qErr, qResult){
-		if (qErr) { return next(qErr); }
-		if(qResult){ //Matching application already exists
-			return next(new Error('Application with this information already exists.'));
-		}
-		//application does not already exist
-		//TODO: Only add valid appData
-		var appData = req.body;
-		//TODO: Add user data under owner parameter
-		var application = new Application(appData);
-		Application.save(function (err, result) {
-			if (err) { return next(err); }
-			if (!result) {
-				return next(new Error('application could not be added.'));
+	if(!_.has(req.body, "name") || !_.has(req.body, "owner")){
+		res.status(400).send("Name and Owner Id are required to create a new app");
+	} else {
+		console.log('add request with name: ' + req.body.name + ' with body:', req.body);
+		var query = Application.findOne({"name":req.body.name}); // find using name field
+		query.exec(function (qErr, qResult){
+			if (qErr) { return next(qErr); }
+			if(qResult){ //Matching application already exists
+				return next(new Error('Application with this name already exists.'));
 			}
-			res.json(result);
+			//application does not already exist
+			//TODO: Only add valid appData
+			var appData = req.body;
+			//TODO: Add user data under owner parameter
+			var application = new Application(appData);
+			application.save(function (err, result) {
+				if (err) { return next(err); }
+				if (!result) {
+					return next(new Error('Application could not be added.'));
+				}
+				res.json(result);
+			});
 		});
-	});
+	}
+
+
 };
 
 /**

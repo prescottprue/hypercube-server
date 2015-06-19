@@ -1,27 +1,28 @@
 angular.module('hypercubeServer.applications')
-.controller('ApplicationsCtrl', ['$scope', '$http', 'applicationService', function($scope, $http, applicationService){
+.controller('ApplicationsCtrl', ['$scope', '$http', '$log', 'applicationsService', function($scope, $http, $log, applicationsService){
 		$scope.data = {
 			loading:true,
 			error:null
 		};
 		console.log('ApplicationListController');
-		applicationService.get().then(function (applicationsList){
+		applicationsService.get().then(function (applicationsList){
+			$log.log('applications list loaded:', applicationsList);
 			$scope.data.loading = false;
-			console.log('applications list loaded:', applicationsList);
 			$scope.applications = applicationsList;
 		}, function (err){
-			console.error('Error loading applications', err);
+			$log.error('Error loading applications', err);
 			$scope.data.loading = false;
 			$scope.data.error = err;
 		});
 		$scope.delete = function(ind){
 			$scope.data.loading = true;
 			var applicationId = $scope.applications[ind]._id;
-			console.log('calling delete with id:', applicationId);
-			applicationService.delete(applicationId).then(function(response){
-				console.log('application deleted successfully');
+			$log.log('calling delete with id:', applicationId);
+			applicationsService.delete(applicationId).then(function(response){
+				$log.log('application deleted successfully');
+				$scope.applications.splice(ind, 1);
 			}, function(err){
-				console.error('Error loading applications', err);
+				$log.error('Error loading applications', err);
 				$scope.data.loading = false;
 				$scope.data.error = err;
 			});
