@@ -7,24 +7,23 @@ s3Sdk = require('s3'),
 q = require('q'),
 _ = require('underscore');
 
+var conf = require('../config/default').config;
 
-var s3KeyVarName = "HYPERCUBE_S3_KEY";
-var s3SecretVarName = "HYPERCUBE_S3_SECRET";
 var s3 = configureS3AndGetClient();
 /** Set S3 credentials from environment variables if they are availble and return the s3 s3 object
  * @function configureS3AndGetClient
  */
 function configureS3AndGetClient(){
-	if(_.has(process.env, s3KeyVarName) && _.has(process.env, s3SecretVarName)){
+	if(_.has(conf.s3, "key") && _.has(conf.s3, "secret")){
 		aws.config.update({
-			accessKeyId:process.env[s3KeyVarName],
-			secretAccesssKey:process.env[s3SecretVarName]
+			accessKeyId:conf.s3.key,
+			secretAccesssKey:conf.s3.secret
 		});
 		//TODO: Configure more settings on s3
 		return s3Sdk.createClient({
 			s3Options:{
-				accessKeyId: process.env[s3KeyVarName],
-				secretAccessKey: process.env[s3SecretVarName]
+				accessKeyId: conf.s3.key,
+				secretAccessKey: conf.s3.secret
 			}
 		});
 	} else {
@@ -180,7 +179,7 @@ exports.getBuckets = function(bucketName){
 			d.reject(err);
 		});
 		deleteTask.on('end', function(){
-			console.log(bucketName + 'bucket deleted successfully:');
+			console.log(bucketName + ' bucket emptied of files successfully');
 			var s3bucket = new aws.S3();
 			// Delete bucket
 			s3bucket.deleteBucket({Bucket: bucketName}, function(err, data) {
@@ -189,7 +188,7 @@ exports.getBuckets = function(bucketName){
 					d.reject(err);
 				} else {
 					// Setup Bucket website
-					d.resolve({message: bucketName + 'Bucket deleted successfully'});
+					d.resolve({message: bucketName + ' Bucket deleted successfully'});
 				}
 			});
 		});
