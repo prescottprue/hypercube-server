@@ -52,7 +52,7 @@ ApplicationSchema.methods = {
 	},
 	removeStorage:function(){
 		var d = q.defer();
-		fileStorage.deleteBucket(this.name).then(function (){
+		fileStorage.deleteAppBucket(this.name).then(function (){
 			console.log('Storage removed successfully');
 			d.resolve();
 		}, function (err){

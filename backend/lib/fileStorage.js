@@ -12,13 +12,18 @@ exports.createBucket = function(appName){
 	console.log('[fileStorage.createBucket()]');
 	return s3.createBucketSite(bucketKeyPrefix + appName);
 };
-exports.deleteBucket = function(appName){
+exports.deleteAppBucket = function(appName){
 	return s3.deleteBucket(bucketKeyPrefix + appName);
+};
+exports.deleteBucket = function(bucketName){
+	return s3.deleteBucket(bucketName);
 };
 exports.uploadFiles = function(appName, localDir){
 	return s3.uploadFiles(bucketKeyPrefix + appName, localDir);
 };
-
+exports.getBuckets = function(appName, localDir){
+	return s3.getBuckets(bucketKeyPrefix + appName, localDir);
+};
 	//File type if statements
 	// if (fileType=='html') {
 	// 	contentType = 'text/html'

@@ -21,8 +21,12 @@ function setupRoutes(app, routeConfig){
   //Check that route object has all required keys
   function validateRoute(route){
     var requiredKeys = ["type", "endpoint", "controller"];
-    return _.every(requiredKeys, function(keyName){
+    var hasRequiredKeys = _.every(requiredKeys, function(keyName){
       return _.has(route, keyName);
     });
+    if(hasRequiredKeys && !_.isFunction(route.controller)){
+      console.warn("WARNING: Route has invalid controller function: ", route);
+    }
+    return (hasRequiredKeys && _.isFunction(route.controller));
   }
 }

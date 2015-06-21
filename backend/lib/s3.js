@@ -69,7 +69,9 @@ exports.deleteBucket = function(bucketName){
 	return deleteS3Bucket(bucketName);
 };
 
-
+exports.getBuckets = function(bucketName){
+	return getBuckets();
+};
 
 
 
@@ -171,7 +173,6 @@ exports.deleteBucket = function(bucketName){
 	function deleteS3Bucket(bucketName){
 		console.log('deleteS3Bucket called', bucketName)
 		var d = q.defer();
-		var s3bucket = new aws.S3();
 		// Empty bucket
 		var deleteTask = s3.deleteDir({Bucket: bucketName});
 		deleteTask.on('error', function(err){
@@ -179,7 +180,8 @@ exports.deleteBucket = function(bucketName){
 			d.reject(err);
 		});
 		deleteTask.on('end', function(){
-			console.log('bucket deleted successfully:');
+			console.log(bucketName + 'bucket deleted successfully:');
+			var s3bucket = new aws.S3();
 			// Delete bucket
 			s3bucket.deleteBucket({Bucket: bucketName}, function(err, data) {
 				if(err){
@@ -187,7 +189,7 @@ exports.deleteBucket = function(bucketName){
 					d.reject(err);
 				} else {
 					// Setup Bucket website
-					d.resolve({message:'Bucket deleted successfully'});
+					d.resolve({message: bucketName + 'Bucket deleted successfully'});
 				}
 			});
 		});
@@ -237,4 +239,22 @@ function copyTemplateToS3(bucketName, templateLocalPath){
     }
   });
   return d.promise;
+}
+
+function getBuckets(){
+	var d = q.defer();
+	var s3 = new aws.S3();
+	s3.listBuckets(function(err, data) {
+	  if (err) { console.log("Error:", err); 
+		  d.reject(err);
+		}
+	  else {
+	    for (var index in data.Buckets) {
+	      var bucket = data.Buckets[index];
+	      console.log("Bucket: ", bucket.Name, ' : ', bucket.CreationDate);
+	    }
+	    d.resolve(data.Buckets);
+	  }
+	});
+	return d.promise;
 }
