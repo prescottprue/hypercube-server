@@ -52,7 +52,7 @@ UserSchema.methods = {
 		data.userId = this.toJSON().id;
 		return data;
 	},
-		//Log user in
+	//Log user in
 	login:function(passwordAttempt){
 		var d = Q.defer();
 		var self = this;

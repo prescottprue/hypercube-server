@@ -18,7 +18,7 @@ angular.module('hypercubeServer.applications')
 			$scope.data.loading = true;
 			var applicationId = $scope.applications[ind]._id;
 			$log.log('calling delete with id:', applicationId);
-			applicationsService.delete(applicationId).then(function(response){
+			applicationsService.del(applicationId).then(function(response){
 				$log.log('application deleted successfully');
 				$scope.applications.splice(ind, 1);
 			}, function(err){

@@ -72,7 +72,6 @@ exports.update = function(req, res, next){
 	Group.update({_id:req.id}, req.body, {upsert:true}, function (err, numberAffected, result) {
 		if (err) { return next(err); }
 		if (!result) {
-
 			return next(new Error('Group could not be added.'));
 		}
 		res.json(result);

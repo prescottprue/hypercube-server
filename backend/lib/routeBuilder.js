@@ -9,15 +9,11 @@ module.exports = function(app){
 //Setup each of the specified routes with the router
 function setupRoutes(app, routeConfig){
   var routeTypes = _.keys(routeConfig);
-  console.log('route types:', routeTypes);
   //Loop over each category of routes
   _.each(routeTypes, function(routeType){
-    console.log('route type:', routeType);
     var routesArray = routeConfig[routeType];
-    console.log('Routes array:', routesArray);
     _.each(routesArray, function(route){
       if(validateRoute(route)){
-        console.log('made route:', route);
         app.route(route.endpoint)[route.type.toLowerCase()](route.controller);
       }
     });

@@ -5,7 +5,7 @@ var Application = require('../models/application').Application;
 var mongoose = require('mongoose');
 var url = require('url');
 var _ = require('underscore');
-
+var q = require('q');
 /**
  * @api {get} /applications Get Applications list
  * @apiName GetApplication
@@ -75,17 +75,15 @@ exports.add = function(req, res, next){
 			var appData = req.body;
 			//TODO: Add user data under owner parameter
 			var application = new Application(appData);
-			application.save(function (err, result) {
-				if (err) { return next(err); }
-				if (!result) {
-					return next(new Error('Application could not be added.'));
-				}
-				res.json(result);
+			console.log('about to call create with storage:', appData);
+			application.createWithStorage().then(function(newApp){
+				console.log('application created with storage');
+				res.json(newApp);
+			}, function(err){
+				res.status(400).send(err);
 			});
 		});
 	}
-
-
 };
 
 /**
@@ -140,13 +138,19 @@ exports.update = function(req, res, next){
  *
  */
 exports.delete = function(req, res, next){
-	var urlParams = url.parse(req.url, true).query;
+	console.log('delete request:', req.params);
 	var query = Application.findOneAndRemove({'name':req.params.name}); // find and delete using id field
 	query.exec(function (err, result){
 		if (err) { return next(err); }
 		if (!result) {
+			console.log('no result');
 			return next(new Error('Application could not be deleted.'));
 		}
-		res.json(result);
+		var app = new Application(result);
+		app.removeStorage().then(function(){
+			res.json(result);
+		}, function(err){
+			res.status(400).send(err);
+		});
 	});
 };
