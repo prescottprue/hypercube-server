@@ -5,9 +5,11 @@ module.exports = {
 		'/bower/angular-aria/angular-aria.min.js',
 		'/bower/ui-router/release/angular-ui-router.min.js',
 		'/bower/angular-material/angular-material.min.js',
+		'/bower/angular-messages/angular-messages.min.js',
 		'/bower/ngstorage/ngStorage.min.js',
 		'/bower/angular-jwt/dist/angular-jwt.min.js',
-		'/bower/underscore/underscore-min.js'
+		'/bower/underscore/underscore-min.js',
+
 	],
 	app:[
 		'/app.js',

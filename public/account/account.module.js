@@ -1,1 +1,1 @@
-angular.module('hypercubeServer.account', ['ui.router', 'hypercubeServer.auth'])
+angular.module('hypercubeServer.account', ['ui.router', 'ngMessages', 'hypercubeServer.auth'])

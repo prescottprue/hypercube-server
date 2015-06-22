@@ -84,31 +84,11 @@ ApplicationSchema.methods = {
 			}
 		});
 		return d.promise;
+	},
+	saveFile: function(){
+		//TODO: Make this work
+		return fileStorage.saveFile();
 	}
-	// addStorageBucket:function(){
-	// 	console.log('[Application.addStorageBucket()] Creating new bucket with app name');
-	// 	//Add bucket with app name
-	// },
-	// createWithTemplate:function(templateName){
-	// 	var d = q.defer();
-	// 	//Create a new bucket
-	// 	addStorageBucket().then(function(){
-	// 		//Upload all the files from the template
-	// 		var templateFiles = ["public/app.js", "public/app-routes.js"];
-	// 		fileStorage.uploadFiles(templateFiles).then(function(files){
-	// 			console.log('Files uploaded successfully');
-	// 			d.resolve(files);
-	// 		}, function(err){
-	// 			console.error('Error uploading files:', err);
-	// 			d.reject(err);
-	// 		});
-	// 	}, function(err){
-	// 		console.error('Error uploading files:', err);
- //      d.reject(err);
-	// 	});
-	// 	//In the future possibly do a build task?
-	// 	return d.promise;
-	// }
 };
 
 /*

@@ -3,6 +3,7 @@ angular.module('hypercubeServer', [
     'ngMaterial', 
     'ngStorage', 
     'angular-jwt',
+    'ngMessages',
 
     'hypercubeServer.auth',
     'hypercubeServer.account',

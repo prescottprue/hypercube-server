@@ -65,15 +65,27 @@ exports.createBucketSite = function(bucketName){
 	}
 	return d.promise;
 }
-
+/** Delete an S3 Bucket
+ * @function createBucketSite
+ * @params {string} bucketName Name of new bucket to delete
+ */
 exports.deleteBucket = function(bucketName){
 	return deleteS3Bucket(bucketName);
 };
 
-exports.getBuckets = function(bucketName){
+/** Get List of buckets
+ * @function getBuckets
+ */
+exports.getBuckets = function(){
 	return getBuckets();
 };
 
+/** Save a file to an S3 bucket
+ * @function saveFile
+ */
+exports.saveFile = function(bucketName, fileKey, fileContents){
+	return saveToFileOnS3(bucketName, fileKey, fileContents);
+};
 
 
 //----------------- Helper Functions ------------------//
@@ -199,8 +211,8 @@ exports.getBuckets = function(bucketName){
 		return d.promise;
 	}
 
-	/** Upload file contents to S3 given bucket, file key and file contents
- * @function uploadFromRamList
+/** Upload file contents to S3 given bucket, file key and file contents
+ * @function saveToFileOnS3
  * @params {string} bucketName - Name of bucket to upload to
  * @params {string} fileKey - Key of file to save
  * @params {string} fileContents - File contents in string form
@@ -224,6 +236,7 @@ function saveToFileOnS3(bucketName, argFileKey, argFileContents){
   });
   return d.promise;
 }
+
 //TODO: MAKE THIS WORK
 function copyTemplateToS3(bucketName, templateLocalPath){
 	console.log('[saveToFileOnS3] saveToFileOnS3 called', arguments);
