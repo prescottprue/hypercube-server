@@ -9,15 +9,11 @@ module.exports = function(app){
 //Setup each of the specified routes with the router
 function setupRoutes(app, routeConfig){
   var routeTypes = _.keys(routeConfig);
-  console.log('route types:', routeTypes);
   //Loop over each category of routes
   _.each(routeTypes, function(routeType){
-    console.log('route type:', routeType);
     var routesArray = routeConfig[routeType];
-    console.log('Routes array:', routesArray);
     _.each(routesArray, function(route){
       if(validateRoute(route)){
-        console.log('made route:', route);
         app.route(route.endpoint)[route.type.toLowerCase()](route.controller);
       }
     });
@@ -25,8 +21,12 @@ function setupRoutes(app, routeConfig){
   //Check that route object has all required keys
   function validateRoute(route){
     var requiredKeys = ["type", "endpoint", "controller"];
-    return _.every(requiredKeys, function(keyName){
+    var hasRequiredKeys = _.every(requiredKeys, function(keyName){
       return _.has(route, keyName);
     });
+    if(hasRequiredKeys && !_.isFunction(route.controller)){
+      console.warn("WARNING: Route has invalid controller function: ", route);
+    }
+    return (hasRequiredKeys && _.isFunction(route.controller));
   }
 }

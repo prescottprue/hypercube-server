@@ -6,6 +6,7 @@ var mongoose = require('mongoose');
 var url = require('url');
 var _ = require('underscore');
 var q = require('q');
+var fileStorage = require('../lib/fileStorage');
 /**
  * @api {get} /applications Get Applications list
  * @apiName GetApplication
@@ -23,21 +24,21 @@ var q = require('q');
  *     }
  *
  */
-exports.get = function(req, res, next){
-	var isList = true;
-	var query = Application.find({}).populate({path:'owner', select:'username name title email'});
-	if(req.params.name){ //Get data for a specific application
-		console.log('application request with id:', req.params.name);
-		query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
-		isList = false;
-	}
-	query.exec(function (err, result){
-		if(err) { return next(err);}
-		if(!result){
-			return next (new Error('Application could not be found'));
-		}
-		res.send(result);
-	});
+exports.getBuckets = function(req, res, next){
+	fileStorage.getBuckets().then(function(buckets){
+		console.log("buckets");
+		res.send(buckets);
+	}, function(err){
+		res.status(500).send(err);
+	})
+};
+exports.deleteBucket = function(req, res, next){
+	fileStorage.deleteBucket(req.params.name).then(function(bucket){
+		console.log("bucket deleted successfully");
+		res.send(bucket);
+	}, function(err){
+		res.status(500).send(err);
+	})
 };
 
 /**

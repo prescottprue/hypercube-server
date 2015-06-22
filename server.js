@@ -30,7 +30,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 var allowedPaths = ['/', '/login', '/signup', '/docs'];
 // var assets = require('./assets');
 // allowedPaths = _.union(allowedPaths, config.vendor, config.app);
-console.log('config:', config);
 //Protect all routes by requiring Authorization header
 app.use(jwt({secret: config.jwtSecret}).unless({path:allowedPaths}));
 

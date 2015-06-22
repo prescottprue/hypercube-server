@@ -1,8 +1,6 @@
 var env = process.env.NODE_ENV;
 var config;
 
-console.log('Server mode:', env);
-
 switch (env) {
 	case "STAGE":
 		config = require("./env/staging");

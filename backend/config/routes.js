@@ -4,6 +4,8 @@ var authCtrls = require('../controllers/auth');
 var userCtrls = require('../controllers/users');
 var appCtrls = require('../controllers/applications');
 var rolesCtrl = require('../controllers/roles');
+var adminCtrl = require('../controllers/admin');
+
 
 module.exports =  {
 	//login(get token)
@@ -117,6 +119,23 @@ module.exports =  {
 			type:'DELETE',
 			endpoint: '/roles/:name',
 			controller:rolesCtrl['delete']
+		}
+	],
+	admin:[
+		{
+			type:'GET',
+			endpoint: '/admin/buckets',
+			controller:adminCtrl.getBuckets
+		},
+		{
+			type:'GET',
+			endpoint: '/admin/buckets/:name',
+			controller:adminCtrl.get
+		},
+		{
+			type:'DELETE',
+			endpoint: '/admin/buckets/:name',
+			controller:adminCtrl.deleteBucket
 		}
 	]
 };
