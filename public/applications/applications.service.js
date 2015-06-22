@@ -2,6 +2,27 @@ angular.module('hypercubeServer.applications')
 .factory('applicationsService', ['$q', '$http', '$rootScope','$sessionStorage', function ($q, $http, $rootScope, $sessionStorage) {
 	var applications = null;
 	return {
+		add:function(applicationData){
+			var d = $q.defer();
+			if(!applicationData){
+				$log.warn('[ApplicationsService.add()] No application data');
+				d.reject({message:'Name required to create new application'});
+			} else {
+				console.log('$rootScope:', $rootScope);
+				applicationData.owner = $rootScope.currentUser._id;
+				$http.post(DB_URL + '/apps', applicationData)
+				.then(function (apiRes){
+					d.resolve(apiRes.data);
+				})
+				.catch(function (errRes){
+					//TODO: Handle different error response codes
+					$log.error('Error loading application', errRes.data);
+					d.reject(errRes.data);
+				});
+			}
+
+			return d.promise;
+		},
 		update:function(applicationId, applicationData){
 			var deferred = $q.defer();
 			console.log('applicationService: Updating application with id: ' + applicationId, applicationData);

@@ -15,6 +15,7 @@ var s3 = configureS3AndGetClient();
  */
 function configureS3AndGetClient(){
 	if(_.has(conf.s3, "key") && _.has(conf.s3, "secret")){
+		console.log('logging into s3 with key:', conf.s3.key + " and secret " + conf.s3.secret);
 		aws.config.update({
 			accessKeyId:conf.s3.key,
 			secretAccesssKey:conf.s3.secret
@@ -35,19 +36,20 @@ function configureS3AndGetClient(){
 
 
 /** Create new S3 bucket and set default cors settings, and set index.html is website
- * @function createAndConfigS3Bucket
+ * @function createBucketSite
  * @params {string} newBucketName Name of new bucket to create
  */
 exports.createBucketSite = function(bucketName){
-	console.log('createAndConfigS3Bucket called', bucketName);
+	console.log('createBucketSite called', bucketName);
 	var d = q.defer();
 	if(bucketName) {
+			console.log('[createBucketSite] bucket name:', bucketName);
 			createS3Bucket(bucketName).then(function(location){
-				console.log('[createAndConfigS3Bucket] createS3Bucket successful:', location);
+				console.log('[createBucketSite] createS3Bucket successful:', location);
 				setS3Cors(bucketName).then(function(){
-					console.log('[createAndConfigS3Bucket] setS3Cors successful');
+					console.log('[createBucketSite] setS3Cors successful');
 					setS3Website(bucketName).then(function(){
-						console.log('[createAndConfigS3Bucket] setS3Website successful');
+						console.log('[createBucketSite] setS3Website successful', bucketName);
 						d.resolve(bucketName);
 					});
 				}, function(err){
@@ -157,9 +159,11 @@ exports.getBuckets = function(bucketName){
 				d.reject({status:500, error:err});
 			} else {
 				console.log('[createS3Bucket] bucketCreated successfully:', data);
+				console.log('[createS3Bucket] bucketCreated successfully:', data.Location);
+
 				// Setup Bucket website
 				var dataContents = data.toString();
-				d.resolve(dataContents.locationn);
+				d.resolve(dataContents.Location);
 			}
 		});
 		return d.promise;

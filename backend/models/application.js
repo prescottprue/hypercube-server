@@ -5,6 +5,7 @@ var q = require('q');
 var ApplicationSchema = new mongoose.Schema({
 	owner:{type: mongoose.Schema.Types.ObjectId, ref:'User'},
 	name:{type:String, default:'', unique:true, index:true},
+	clients:[{url:{type:String, default:''}, provider:{type:String, default:''}, bucketName:{type:String, default:''}}],
 	groups:[{type:mongoose.Schema.Types.ObjectId, ref:'Group'}],
 	collaborators:[{type: mongoose.Schema.Types.ObjectId, ref:'User'}],
 	createdAt: { type: Date, default: Date.now},
@@ -27,7 +28,25 @@ ApplicationSchema.methods = {
 	},
 	createStorage:function(){
 		console.log('[application.createStorage] called');
-		return fileStorage.createBucket(this.name);
+		var self = this;
+		var d = q.defer();
+		fileStorage.createBucketSite(this.name).then(function(bucket){
+			var clientInfo = {url:newApplication.url, bucketName:newApplication.name, provider:"Amazon"};
+			if(self.client){
+				self.client.push(clientInfo) ;
+			} else {
+				self.client = [clientInfo];
+			}
+			self.saveNew().then(function (appWithStorage){
+				console.log("AppsWithStorage saved with storage:", appWithStorage);
+				d.resolve(appWithStorage);
+			}, function (err){
+				d.reject(err);
+			});
+		}, function (err){
+			d.reject(err);
+		});
+		return d.promise;
 	},
 	createWithStorage:function(){
 		var self = this;
@@ -36,7 +55,7 @@ ApplicationSchema.methods = {
 		this.saveNew().then(function (newApplication){
 			console.log('[application.createWithStorage] new app saved successfully', newApplication);
 			self.createStorage().then(function(){
-				console.log('[application.createWithStorage] storage created successfully');
+				console.log('[application.createWithStorage] storage created successfully', newApplication);
 				d.resolve(newApplication);
 			}, function(err){
 				console.log('[application.createWithStorage] error creating storage', err);
