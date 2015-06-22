@@ -1,7 +1,9 @@
+var conf = require('./config.json');
 module.exports = function(grunt){
 	var serverFolder = "backend/";
 	var frontFolder = "public/";
 	grunt.initConfig({
+		pkg: grunt.file.readJSON('package.json'),
 		concurrent:{
 			tasks:['watch','nodemon'],
 			logCuncurrentOutput:true
@@ -15,7 +17,14 @@ module.exports = function(grunt){
 		nodemon:{
 			local:{
 				script: 'bin/www',
-				ignore:['node_modules/**']
+				ignore:['node_modules/**'],
+				options: {
+          nodeArgs: ['--debug'],
+	        env:{
+	        	PORT:conf.port
+	        }
+        },
+
 			}
 		},
 		apidoc: {

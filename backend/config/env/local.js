@@ -1,7 +1,7 @@
 module.exports = {
 	db:{
 		url:"localhost:27017",
-		name:"test"
+		name:"hypercube"
 	},
 	s3:{
 		key:process.env.HYPERCUBE_SERVER_S3_KEY || process.env.HYPERCUBE_SERVER_S3_KEY,
