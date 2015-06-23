@@ -6,7 +6,7 @@ _ = require('underscore'),
 s3 = require('./s3');
 
 
-var bucketKeyPrefix = "hypercube-app-";
+var bucketKeyPrefix = "hypercube-test1-";
 
 exports.createBucket = function(appName){
 	console.log('[fileStorage.createBucket()]');

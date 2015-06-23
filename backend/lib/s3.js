@@ -44,19 +44,23 @@ exports.createBucketSite = function(bucketName){
 	var d = q.defer();
 	if(bucketName) {
 			console.log('[createBucketSite] bucket name:', bucketName);
-			createS3Bucket(bucketName).then(function(location){
-				console.log('[createBucketSite] createS3Bucket successful:', location);
+			createS3Bucket(bucketName).then(function(bucketData){
+				console.log('[createBucketSite] createS3Bucket successful:', bucketData);
 				setS3Cors(bucketName).then(function(){
 					console.log('[createBucketSite] setS3Cors successful');
+					// d.resolve(bucketData);
 					setS3Website(bucketName).then(function(){
-						console.log('[createBucketSite] setS3Website successful', bucketName);
+						console.log('[createBucketSite] setS3Website successful');
 						d.resolve(bucketName);
+					}, function (err){
+						console.error('Error setting bucket site', err);
+						d.reject(err);
 					});
-				}, function(err){
+				}, function (err){
 					console.error('Error setting new bucket cors config', err);
 					d.reject(err);
 				});
-			}, function(err){
+			}, function (err){
 				console.error('Error creating new bucket', err);
 				d.reject(err);
 			});
@@ -135,7 +139,7 @@ exports.saveFile = function(bucketName, fileKey, fileContents){
  * @params {string} newBucketName Name of bucket for which to set website configuration
  */
 	function setS3Website(bucketName){
-		console.log('setS3Website called:', bucketName);
+		console.log('[setS3Website()] setS3Website called:', bucketName);
 		var s3bucket = new aws.S3();
 		var d = q.defer();
 		s3bucket.putBucketWebsite({
@@ -147,10 +151,10 @@ exports.saveFile = function(bucketName, fileKey, fileContents){
 			}
 		}, function(err, data){
 			if(err){
-				console.error('Error creating bucket website setup');
+				console.error('[setS3Website()] Error creating bucket website setup');
 				d.reject({status:500, error:err});
 			} else {
-				console.log('website config set for ' + bucketName, data);
+				console.log('[setS3Website()] website config set for ' + bucketName, data);
 				d.resolve();
 			}
 		});
@@ -171,11 +175,9 @@ exports.saveFile = function(bucketName, fileKey, fileContents){
 				d.reject({status:500, error:err});
 			} else {
 				console.log('[createS3Bucket] bucketCreated successfully:', data);
-				console.log('[createS3Bucket] bucketCreated successfully:', data.Location);
-
 				// Setup Bucket website
 				var dataContents = data.toString();
-				d.resolve(dataContents.Location);
+				d.resolve(dataContents);
 			}
 		});
 		return d.promise;

@@ -30,13 +30,15 @@ ApplicationSchema.methods = {
 		console.log('[application.createStorage] called');
 		var self = this;
 		var d = q.defer();
-		fileStorage.createBucketSite(this.name).then(function(bucket){
-			var clientInfo = {url:newApplication.url, bucketName:newApplication.name, provider:"Amazon"};
+		fileStorage.createBucket(this.name).then(function(bucket){
+			console.log("[createStorage()] New storage created:", bucket);
+			var clientInfo = {url:bucket.url, bucketName:bucket.name, provider:"Amazon"};
 			if(self.client){
 				self.client.push(clientInfo) ;
 			} else {
 				self.client = [clientInfo];
 			}
+			console.log('about to save new with bucket info:', self);
 			self.saveNew().then(function (appWithStorage){
 				console.log("AppsWithStorage saved with storage:", appWithStorage);
 				d.resolve(appWithStorage);
