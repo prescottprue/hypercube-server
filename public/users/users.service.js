@@ -1,5 +1,5 @@
 angular.module('hypercubeServer.users')
-.factory('usersService', ['$q', '$http', '$rootScope', function ($q, $http, $rootScope) {
+.factory('usersService', ['$q', '$http', '$rootScope', '$log', function ($q, $http, $rootScope, $log) {
 	var users = null;
 	return {
 		update:function(username, userData){

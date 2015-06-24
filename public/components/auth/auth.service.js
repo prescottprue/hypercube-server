@@ -61,7 +61,7 @@ angular.module('hypercubeServer.auth')
 	    	}, function(err){
 					$log.error('Error Logging in as new user:', err);
 	    		deferred.reject(err);
-	    	})
+	    	});
 	    })
 	    .catch(function (apiResponse) {
 	      console.error('AuthService: Error signing up:', apiResponse);

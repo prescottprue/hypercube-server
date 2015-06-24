@@ -93,6 +93,7 @@ exports.login = function(req, res, next){
 		} else {
 			query = User.findOne({"email":req.body.email}); // find using email field
 		}
+		console.log('login user query:', query);
 		query.exec(function (err, currentUser){
 			if(err) { console.error('login error:', err);
 				return next(err);}

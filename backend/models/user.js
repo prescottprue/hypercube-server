@@ -21,8 +21,8 @@ var UserSchema = new mongoose.Schema(
 		password:{type: String, default:''},
 		role:{type: String, default:'user'},
 		sessionId:{type:String},
-		createdAt: { type: Date, default: Date.now, index: true},
-		updatedAt: { type: Date, default: Date.now, index: true}
+		createdAt: { type: Date, default: Date.now},
+		updatedAt: { type: Date, default: Date.now}
 	},
 	{
 		toJSON:{virtuals:true}

@@ -12,14 +12,12 @@ angular.module('hypercubeServer.account')
 	};
 	// --------------- Auth Session ----------------- //
 	$scope.login = function() {
-		$scope.loginData.loading = true;
 		if(!$scope.loginData.username || $scope.loginData.username.length < 1){
 			$scope.loginData.missing.username = true;
-		}
-		if(!$scope.loginData.password || $scope.loginData.password.length < 1){
+		} else if(!$scope.loginData.password || $scope.loginData.password.length < 1){
 			$scope.loginData.missing.password = true;
-		}
-		if($scope.loginData.username && $scope.loginData.password){
+		} else {
+			$scope.loginData.loading = true;
 			AuthService.login($scope.loginData)
 			.then(function (authData){
 				$log.log('Successful login:', authData);
@@ -27,9 +25,11 @@ angular.module('hypercubeServer.account')
 				$scope.showToast("Logged in");
 				$state.go('users');
 			}, function (err){
+				$log.error('Login error:', err);
 				$scope.loginData = {loading:false, email:null, password:null};
 			});
 		}
+			
 	};
 	$scope.logout = function(){
 		AuthService.logout().then(function(){
