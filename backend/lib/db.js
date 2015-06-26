@@ -5,10 +5,9 @@ var dbUrl = conf.config.db.url;
 if(conf.config.db.name){
 	dbUrl += "/" + conf.config.db.name
 }
+console.log('Connecting to mongo url:', dbUrl);
 var hypercube = mongoose.createConnection(dbUrl);
 hypercube.on('error',function (err) {
-	console.log('mongourl:', conf.config.db.url + conf.config.db.name);
-
 	console.error('Mongoose error:', err);
 });
 hypercube.on('connected', function () {

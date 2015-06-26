@@ -5,7 +5,21 @@ var q = require('q');
 var ApplicationSchema = new mongoose.Schema({
 	owner:{type: mongoose.Schema.Types.ObjectId, ref:'User'},
 	name:{type:String, default:'', unique:true, index:true},
-	clients:[{url:{type:String, default:''}, provider:{type:String, default:''}, bucketName:{type:String, default:''}}],
+	frontend:{
+		url:{type:String, default:''}, 
+		provider:{type:String, default:'Amazon'}, 
+		bucketName:{type:String, default:''}, 
+		files:[{
+			path:{type:String, default:''}, 
+			name:{type:String, default:''}, 
+			filetype:{type:String, default:''}
+		}]
+	},
+	server:{
+		url:{type:String, default:''}, 
+		provider:{type:String, default:'Heroku'}, 
+		appName:{type:String, default:''}
+	},
 	groups:[{type:mongoose.Schema.Types.ObjectId, ref:'Group'}],
 	collaborators:[{type: mongoose.Schema.Types.ObjectId, ref:'User'}],
 	createdAt: { type: Date, default: Date.now},
@@ -32,15 +46,10 @@ ApplicationSchema.methods = {
 		var d = q.defer();
 		fileStorage.createBucket(this.name).then(function(bucket){
 			console.log("[createStorage()] New storage created:", bucket);
-			var clientInfo = {url:bucket.url, bucketName:bucket.name, provider:"Amazon"};
-			if(self.client){
-				self.client.push(clientInfo) ;
-			} else {
-				self.client = [clientInfo];
-			}
-			console.log('about to save new with bucket info:', self);
+			self.frontend = {url:bucket.url, bucketName:bucket.name, provider:'Amazon'};
+			console.log('[createStorage()] about to save new with bucket info:', self);
 			self.saveNew().then(function (appWithStorage){
-				console.log("AppsWithStorage saved with storage:", appWithStorage);
+				console.log('[createStorage()]AppsWithStorage saved with storage:', appWithStorage);
 				d.resolve(appWithStorage);
 			}, function (err){
 				d.reject(err);
@@ -87,9 +96,32 @@ ApplicationSchema.methods = {
 		});
 		return d.promise;
 	},
-	saveFile: function(){
+	saveFile: function(fileData){
 		//TODO: Make this work
-		return fileStorage.saveFile();
+		var d = q.defer();
+		var self = this;
+		fileStorage.saveFile(fileData).then(function (newFile){
+			if(!self.frontend.files){
+				self.frontend.files = [];
+			} else {
+				//TODO: Get specific data from newFile 
+				self.frontend.files.push(newFile);
+			}
+			self.saveNew().then(function (appWithFile){
+				console.log('[saveFile()]AppsWithStorage saved with file:', appWithFile);
+				d.resolve(appWithFile);
+			}, function (err){
+				console.log('[saveFile()]AppsWithStorage error saving application after adding file:', err);
+				d.reject(err);
+			});
+		}, function (err){
+			console.log('[saveFile()]AppsWithStorage error saving file:', err);
+			d.reject(err);
+		});
+		return d.promise;
+	},
+	signedUrl:function(urlData){
+		return fileStorage.signedUrl(urlData);
 	}
 };
 

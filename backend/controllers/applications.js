@@ -109,7 +109,7 @@ exports.add = function(req, res, next){
 exports.update = function(req, res, next){
 	console.log('app update request with name: ' + req.params.name + ' with body:', req.body);
 	if(req.params.name){
-		Application.update({name:req.params.name}, req.body, {upsert:true}, function (err, numberAffected, result) {
+		Application.update({name:req.params.name}, req.body, {upsert:false}, function (err, numberAffected, result) {
 			if (err) { return next(err); }
 			//TODO: respond with updated data instead of passing through req.body
 			res.json(req.body);
@@ -153,4 +153,52 @@ exports.delete = function(req, res, next){
 			res.status(400).send(err);
 		});
 	});
+};
+
+
+/**
+ * @api {put} /applications/:name/  Update a application
+ * @apiName UploadFile
+ * @apiGroup Application
+ *
+ * @apiParam {String} name Name of 
+ * @apiParam {String} content Text string content of file
+ * @apiParam {String} filetype Type of file the be uploaded
+ *
+ * @apiSuccess {Object} applicationData Object containing updated applications data.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "name": "App1",
+ *       "owner": {username:"Doe"}
+ *     }
+ *
+ *
+ */
+exports.files = function(req, res, next){
+	console.log('file upload request with app name: ' + req.params.name + ' with body:', req.body);
+	//TODO: Check that user is owner or collaborator before uploading
+	//TODO: Lookup application and run uploadFile function
+	if(req.params.name && req.query && req.query.action && req.query.key){ //Get data for a specific application
+		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
+		isList = false;
+		query.exec(function (err, foundApp){
+			if(err) { return next(err);}
+			if(!foundApp){
+				return next (new Error('Application could not be found'));
+			}
+			console.log('foundApp:', foundApp);
+			//TODO: Get url from found app
+			var signedUrlData = {action:req.query.action, key:req.query.key, bucket:req.params.name};
+			foundApp.signedUrl(signedUrlData).then(function (appWithFile){
+				console.log('appWithFile returned:', appWithFile);
+				res.send(appWithFile);
+			}, function (err){
+				res.status(400).send('Error saving file:', err);
+			});
+		});
+	} else {
+		res.status(400).send('Application name and fileData are required to upload file')
+	}
 };

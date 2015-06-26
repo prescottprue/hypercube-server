@@ -79,6 +79,11 @@ module.exports =  {
 			controller:appCtrls.get
 		},
 		{
+			type:'GET',
+			endpoint: '/apps/:name/files',
+			controller:appCtrls.files
+		},
+		{
 			type:'POST',
 			endpoint: '/apps',
 			controller:appCtrls.add

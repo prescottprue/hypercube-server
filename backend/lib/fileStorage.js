@@ -24,6 +24,10 @@ exports.uploadFiles = function(appName, localDir){
 exports.getBuckets = function(appName, localDir){
 	return s3.getBuckets(bucketKeyPrefix + appName, localDir);
 };
+exports.signedUrl = function(urlData){
+	urlData.bucket = bucketKeyPrefix + urlData.bucket;
+	return s3.getSignedUrl(urlData);
+};
 	//File type if statements
 	// if (fileType=='html') {
 	// 	contentType = 'text/html'

@@ -1,16 +1,17 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var _ = require('underscore');
-var jwt = require('express-jwt');
-var config = require('./backend/config/default').config;
-var cors = require('cors');
+var express = require('express'),
+path = require('path'),
+favicon = require('serve-favicon'),
+logger = require('morgan'),
+cookieParser = require('cookie-parser'),
+bodyParser = require('body-parser'),
+_ = require('underscore'),
+jwt = require('express-jwt'),
+config = require('./backend/config/default').config,
+cors = require('cors');
+
+var app = express();
 
 var routes = require('./backend/config/routes');
-var app = express();
 var routeBuilder = require('./backend/lib/routeBuilder')(app);
 
 // view engine setup
@@ -27,16 +28,17 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//Protect all routes except allowedPaths by requiring Authorization header
 var allowedPaths = ['/', '/login', '/signup', '/docs'];
-// var assets = require('./assets');
-// allowedPaths = _.union(allowedPaths, config.vendor, config.app);
-//Protect all routes by requiring Authorization header
 app.use(jwt({secret: config.jwtSecret}).unless({path:allowedPaths}));
 
-// app.use('/', routes);
+//Set cors configuration
 app.use(cors())
+
 //Setup routes based on config
 routeBuilder(routes);
+
+//------------ Error handlers -----------//
 
 //Log Errors before they are handled
 app.use(function (err, req, res, next) {
@@ -46,19 +48,19 @@ app.use(function (err, req, res, next) {
   }
   res.send('Error: ' + err.message);
 });
+
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
-// error handlers
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
+if (app.get('env') === 'local') {
+  app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
@@ -68,7 +70,7 @@ if (app.get('env') === 'development') {
 }
 // production error handler
 // no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,

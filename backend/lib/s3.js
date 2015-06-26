@@ -10,9 +10,18 @@ _ = require('underscore');
 var conf = require('../config/default').config;
 
 var s3 = configureS3AndGetClient();
+var s3Client = function(){
+			return s3Sdk.createClient({
+			s3Options:{
+				accessKeyId: conf.s3.key,
+				secretAccessKey: conf.s3.secret
+			}
+		});
+}
 /** Set S3 credentials from environment variables if they are availble and return the s3 s3 object
  * @function configureS3AndGetClient
  */
+ // TODO: Find out why this isn't working
 function configureS3AndGetClient(){
 	if(_.has(conf.s3, "key") && _.has(conf.s3, "secret")){
 		console.log('logging into s3 with key:', conf.s3.key + " and secret " + conf.s3.secret);
@@ -21,12 +30,8 @@ function configureS3AndGetClient(){
 			secretAccesssKey:conf.s3.secret
 		});
 		//TODO: Configure more settings on s3
-		return s3Sdk.createClient({
-			s3Options:{
-				accessKeyId: conf.s3.key,
-				secretAccessKey: conf.s3.secret
-			}
-		});
+		var s3 = new aws.S3(aws.config);
+		return s3;		
 	} else {
 		console.error('Environment not setup properly. Check S3 Keys');
 	}
@@ -91,6 +96,23 @@ exports.saveFile = function(bucketName, fileKey, fileContents){
 	return saveToFileOnS3(bucketName, fileKey, fileContents);
 };
 
+/** Get a signed url
+ * @function saveFile
+ */
+exports.getSignedUrl = function(urlData){
+	var d = q.defer();
+	var params = {Bucket: urlData.bucket, Key: urlData.key};
+	s3.getSignedUrl(urlData.action, params, function (err, url) {
+	  if(err){
+	  	console.log('Error getting signed url:', err);
+	  	d.reject(err);
+	  } else {
+	  	console.log('The URL is', url);
+	  	d.resolve(url);
+	  }
+	});
+	return d.promise;
+};
 
 //----------------- Helper Functions ------------------//
 /** Set Cors configuration for an S3 bucket
@@ -168,18 +190,24 @@ exports.saveFile = function(bucketName, fileKey, fileContents){
 	function createS3Bucket(bucketName){
 		console.log('createS3Bucket called', bucketName)
 		var d = q.defer();
-		var s3bucket = new aws.S3();
-		s3bucket.createBucket({Bucket: bucketName, ACL:'public-read'},function(err, data) {
-			if(err){
-				console.error('[createS3Bucket] error creating bucket:', err);
-				d.reject({status:500, error:err});
-			} else {
-				console.log('[createS3Bucket] bucketCreated successfully:', data);
-				// Setup Bucket website
-				var dataContents = data.toString();
-				d.resolve(dataContents);
-			}
-		});
+		// var s3bucket = new aws.S3();
+		// if(aws.config)
+		console.log('aws config:', aws.config);
+		if(!aws.config.credentials){
+			d.reject(new Error('AWS Credentials are required to access S3'));
+		} else {
+			s3.createBucket({Bucket: bucketName, ACL:'public-read'},function(err, data) {
+				if(err){
+					console.error('[createS3Bucket] error creating bucket:', err);
+					d.reject({status:500, error:err});
+				} else {
+					console.log('[createS3Bucket] bucketCreated successfully:', data);
+					// Setup Bucket website
+					var dataContents = data.toString();
+					d.resolve(dataContents);
+				}
+			});
+		}
 		return d.promise;
 	}
 
