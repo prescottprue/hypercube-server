@@ -28,6 +28,10 @@ exports.signedUrl = function(urlData){
 	urlData.bucket = bucketKeyPrefix + urlData.bucket;
 	return s3.getSignedUrl(urlData);
 };
+exports.upload = function(uploadData){
+	uploadData.bucket = bucketKeyPrefix + uploadData.bucket;
+	return s3.uploadDir(uploadData.bucket, uploadData.localDir);
+};
 	//File type if statements
 	// if (fileType=='html') {
 	// 	contentType = 'text/html'

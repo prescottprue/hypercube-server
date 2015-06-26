@@ -202,3 +202,50 @@ exports.files = function(req, res, next){
 		res.status(400).send('Application name and fileData are required to upload file')
 	}
 };
+
+/**
+ * @api {put} /applications/:name/  Update a application
+ * @apiName UploadFile
+ * @apiGroup Application
+ *
+ * @apiParam {String} name Name of 
+ * @apiParam {String} content Text string content of file
+ * @apiParam {String} filetype Type of file the be uploaded
+ *
+ * @apiSuccess {Object} applicationData Object containing updated applications data.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "name": "App1",
+ *       "owner": {username:"Doe"}
+ *     }
+ *
+ *
+ */
+ var localDir = "./public";
+exports.uploadDir = function(req, res, next){
+	console.log('dir upload request with app name: ' + req.params.name + ' with body:', req.body);
+	//TODO: Check that user is owner or collaborator before uploading
+	//TODO: Lookup application and run uploadFile function
+	if(req.params.name){ //Get data for a specific application
+		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
+		isList = false;
+		query.exec(function (err, foundApp){
+			if(err) { return next(err);}
+			if(!foundApp){
+				return next (new Error('Application could not be found'));
+			}
+			console.log('foundApp:', foundApp);
+			//TODO: Get url from found app, and get localDir from
+			foundApp.uploadDir({bucket:req.params.name, localDir:localDir}).then(function (webUrl){
+				console.log('Buckets web url:', webUrl);
+				res.send(webUrl);
+			}, function (err){
+				res.status(400).send('Error saving file:', err);
+			});
+		});
+	} else {
+		res.status(400).send('Application name and fileData are required to upload file')
+	}
+};
