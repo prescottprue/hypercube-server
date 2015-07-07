@@ -122,6 +122,9 @@ ApplicationSchema.methods = {
 	},
 	signedUrl:function(urlData){
 		return fileStorage.signedUrl(urlData);
+	},
+	getStructure:function(){
+		return fileStorage.getFiles(this.name);
 	}
 };
 
