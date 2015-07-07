@@ -1,5 +1,5 @@
 /** FileStorage Lib 
- *	@description generalized lib for file storage so the services can be changed without affecting file storage calls
+ *	@description generalized lib for file storage so the service/platform used for storage can be changed without affecting file storage calls
  */
 var q = require('q'),
 _ = require('underscore'),
@@ -20,6 +20,10 @@ exports.deleteBucket = function(bucketName){
 };
 exports.uploadFiles = function(appName, localDir){
 	return s3.uploadFiles(bucketKeyPrefix + appName, localDir);
+};
+//Get files stored within a bucket
+exports.getFiles = function(appName){
+	return s3.getFiles(bucketKeyPrefix + appName);
 };
 exports.getBuckets = function(appName, localDir){
 	return s3.getBuckets(bucketKeyPrefix + appName, localDir);

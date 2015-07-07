@@ -123,8 +123,8 @@ ApplicationSchema.methods = {
 	signedUrl:function(urlData){
 		return fileStorage.signedUrl(urlData);
 	},
-	uploadDir:function(urlData){
-		return fileStorage.upload(urlData);
+	getStructure:function(){
+		return fileStorage.getFiles(this.name);
 	}
 };
 

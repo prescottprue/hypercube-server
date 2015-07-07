@@ -158,12 +158,10 @@ exports.delete = function(req, res, next){
 
 /**
  * @api {put} /applications/:name/  Update a application
- * @apiName UploadFile
+ * @apiName Files
  * @apiGroup Application
  *
- * @apiParam {String} name Name of 
- * @apiParam {String} content Text string content of file
- * @apiParam {String} filetype Type of file the be uploaded
+ * @apiParam {String} name Name of application to get files for
  *
  * @apiSuccess {Object} applicationData Object containing updated applications data.
  *
@@ -180,7 +178,7 @@ exports.files = function(req, res, next){
 	console.log('file upload request with app name: ' + req.params.name + ' with body:', req.body);
 	//TODO: Check that user is owner or collaborator before uploading
 	//TODO: Lookup application and run uploadFile function
-	if(req.params.name && req.query && req.query.action && req.query.key){ //Get data for a specific application
+	if(req.params.name){ //Get data for a specific application
 		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
 		isList = false;
 		query.exec(function (err, foundApp){
@@ -189,11 +187,9 @@ exports.files = function(req, res, next){
 				return next (new Error('Application could not be found'));
 			}
 			console.log('foundApp:', foundApp);
-			//TODO: Get url from found app
-			var signedUrlData = {action:req.query.action, key:req.query.key, bucket:req.params.name};
-			foundApp.signedUrl(signedUrlData).then(function (appWithFile){
-				console.log('appWithFile returned:', appWithFile);
-				res.send(appWithFile);
+			foundApp.getStructure().then(function (appFiles){
+				console.log('appFiles returned:', appFiles);
+				res.send(appFiles);
 			}, function (err){
 				res.status(400).send('Error saving file:', err);
 			});

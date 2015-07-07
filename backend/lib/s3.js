@@ -94,6 +94,13 @@ exports.saveFile = function(bucketName, fileKey, fileContents){
 	return saveToBucket(bucketName, fileKey, fileContents);
 };
 
+/** Get list of files within an S3 bucket
+ * @function saveFile
+ */
+exports.getFiles = function(bucketName){
+	return getObjects(bucketName);
+};
+
 /** Get a signed url
  * @function saveFile
  */
@@ -355,3 +362,21 @@ function templateLocalDir(dirPath, templateData){
 	// var compiledFile = template(templateData);
 }
 
+//Get list of objects contained within bucket
+function getObjects(bucketName){
+	var d = q.defer();
+	if(!bucketName){
+		d.reject({message:'Bucket name required to get objects'});
+	}
+	s3.listObjects({Bucket:bucketName}, function(err, data) {
+	  if (err) { 
+	  	console.log("Error:", err);
+		  d.reject(err);
+		}
+	  else {
+	  	console.log("[getObjects] listObjects returned:", data);
+	    d.resolve(data);
+	  }
+	});
+	return d.promise;
+}

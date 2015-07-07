@@ -93,13 +93,16 @@ exports.login = function(req, res, next){
 		} else {
 			query = User.findOne({"email":req.body.email}); // find using email field
 		}
-		console.log('login user query:', query);
+		console.log('[AuthCtrl.login] Login user query:', query);
 		query.exec(function (err, currentUser){
-			if(err) { console.error('login error:', err);
-				return next(err);}
+			if(err) { 
+				console.error('Login error:', err);
+				return next(err);
+			}
 			if(!currentUser){
-				console.error('user not found');
-				return next (new Error('User could not be found'));
+				console.error('[AuthCtrl.login] User not found');
+				// return next (new Error('User could not be found'));
+				return res.status(401).send('Invalid Authentication Credentials');
 			}
 			console.log('[AuthCtrl.login] User found:', currentUser);
 			currentUser.login(req.body.password).then(function(token){
@@ -111,7 +114,6 @@ exports.login = function(req, res, next){
 			});
 		});
 	}
-	
 };
 
 /**
