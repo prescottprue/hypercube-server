@@ -2,24 +2,21 @@ var db = require('./../lib/db');
 var mongoose = require('mongoose');
 var fileStorage = require('../lib/fileStorage');
 var q = require('q');
+var _ = require('underscore');
+
 var ApplicationSchema = new mongoose.Schema({
 	owner:{type: mongoose.Schema.Types.ObjectId, ref:'User'},
 	name:{type:String, default:'', unique:true, index:true},
 	frontend:{
 		url:{type:String, default:''}, 
 		provider:{type:String, default:'Amazon'}, 
-		bucketName:{type:String, default:''}, 
-		files:[{
-			path:{type:String, default:''}, 
-			name:{type:String, default:''}, 
-			filetype:{type:String, default:''}
-		}]
+		bucketName:{type:String, default:''}
 	},
-	server:{
-		url:{type:String, default:''}, 
-		provider:{type:String, default:'Heroku'}, 
-		appName:{type:String, default:''}
-	},
+	// server:{
+	// 	url:{type:String, default:''}, 
+	// 	provider:{type:String, default:'Heroku'}, 
+	// 	appName:{type:String, default:''}
+	// },
 	groups:[{type:mongoose.Schema.Types.ObjectId, ref:'Group'}],
 	collaborators:[{type: mongoose.Schema.Types.ObjectId, ref:'User'}],
 	createdAt: { type: Date, default: Date.now},
@@ -27,6 +24,9 @@ var ApplicationSchema = new mongoose.Schema({
 });
 
 ApplicationSchema.set('collection', 'applications');
+
+// Prefix applied to bucketname
+var bucketPrefix = "hypercube-test1-";
 
 ApplicationSchema.methods = {
 	saveNew: function(){
@@ -44,9 +44,11 @@ ApplicationSchema.methods = {
 		console.log('[application.createStorage] called');
 		var self = this;
 		var d = q.defer();
-		fileStorage.createBucket(this.name).then(function(bucket){
+		var bucketName = bucketPrefix + this.name;
+		fileStorage.createBucket(bucketName).then(function(bucket){
 			console.log("[createStorage()] New storage created:", bucket);
-			self.frontend = {url:bucket.url, bucketName:bucket.name, provider:'Amazon'};
+			// TODO: Add url and website url to frontend data
+			self.frontend = {bucketName:bucketName, provider:'Amazon'};
 			console.log('[createStorage()] about to save new with bucket info:', self);
 			self.saveNew().then(function (appWithStorage){
 				console.log('[createStorage()]AppsWithStorage saved with storage:', appWithStorage);
@@ -78,12 +80,13 @@ ApplicationSchema.methods = {
 		});
 		return d.promise;
 	},
-	selectTemplate:function(){
-
-	},
 	removeStorage:function(){
 		var d = q.defer();
-		fileStorage.deleteAppBucket(this.name).then(function (){
+		if(!_.has(this, 'frontend') || !_.has(this.frontend, 'bucketName')){
+			console.log('No frontend to remove storage of');
+			d.resolve();
+		}
+		fileStorage.deleteBucket(this.frontend.bucketName).then(function (){
 			console.log('Storage removed successfully');
 			d.resolve();
 		}, function (err){
@@ -96,26 +99,15 @@ ApplicationSchema.methods = {
 		});
 		return d.promise;
 	},
-	saveFile: function(fileData){
+	publishFile: function(fileData){
 		//TODO: Make this work
 		var d = q.defer();
 		var self = this;
-		fileStorage.saveFile(fileData).then(function (newFile){
-			if(!self.frontend.files){
-				self.frontend.files = [];
-			} else {
-				//TODO: Get specific data from newFile 
-				self.frontend.files.push(newFile);
-			}
-			self.saveNew().then(function (appWithFile){
-				console.log('[saveFile()]AppsWithStorage saved with file:', appWithFile);
-				d.resolve(appWithFile);
-			}, function (err){
-				console.log('[saveFile()]AppsWithStorage error saving application after adding file:', err);
-				d.reject(err);
-			});
+		fileStorage.saveFile(this.frontend.bucketName, fileData).then(function (newFile){
+			console.log('[Application.publishFile()] File published:', newFile);
+			d.resolve(newFile);
 		}, function (err){
-			console.log('[saveFile()]AppsWithStorage error saving file:', err);
+			console.log('[Application.publishFile()]AppsWithStorage error saving file:', err);
 			d.reject(err);
 		});
 		return d.promise;
@@ -124,7 +116,7 @@ ApplicationSchema.methods = {
 		return fileStorage.signedUrl(urlData);
 	},
 	getStructure:function(){
-		return fileStorage.getFiles(this.name);
+		return fileStorage.getFiles(this.frontend.bucketName);
 	}
 };
 

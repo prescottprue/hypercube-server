@@ -50,11 +50,11 @@ exports.createBucketSite = function(bucketName){
 			createS3Bucket(bucketName).then(function(bucketData){
 				console.log('[createBucketSite] createS3Bucket successful:', bucketData);
 				setBucketCors(bucketName).then(function(){
-					console.log('[createBucketSite] setBucketCors successful');
+					console.log('[createBucketSite] setBucketCors successful. BucketData:', bucketData);
 					// d.resolve(bucketData);
 					setBucketWebsite(bucketName).then(function(){
-						console.log('[createBucketSite] setBucketWebsite successful');
-						d.resolve(bucketName);
+						console.log('[createBucketSite] setBucketWebsite successful. BucketData:', bucketData);
+						d.resolve(bucketData);
 					}, function (err){
 						console.error('Error setting bucket site', err);
 						d.reject(err);
@@ -171,7 +171,8 @@ function createS3Bucket(bucketName){
 				console.log('[createS3Bucket] bucketCreated successfully:', data);
 				// Setup Bucket website
 				var dataContents = data.toString();
-				d.resolve(dataContents);
+				// TODO: Return more accurate information here
+				d.resolve({name:bucketName, websiteUrl:""});
 			}
 		});
 	}
@@ -186,7 +187,7 @@ function deleteS3Bucket(bucketName){
 	console.log('deleteS3Bucket called', bucketName)
 	var d = q.defer();
 	// Empty bucket
-	var deleteTask = s3.deleteDir({Bucket: bucketName});
+	var deleteTask = s3Client.deleteDir({Bucket: bucketName});
 	deleteTask.on('error', function(err){
 		console.error('error deleting bucket:', err);
 		d.reject(err);
@@ -282,14 +283,12 @@ function setBucketWebsite(bucketName){
  * @params {string} fileKey - Key of file to save
  * @params {string} fileContents - File contents in string form
  */
-function saveToBucket(bucketName, argFileKey, argFileContents){
+function saveToBucket(bucketName, fileKey, fileContents){
 	console.log('[saveToBucket] saveToBucket called', arguments);
-	var filePath = argFileKey.replace('%20', '.');
   var d = q.defer();
-  var saveParams = {Bucket:bucketName, Key:filePath,  Body: argFileContents, ACL:'public-read'};
+  var saveParams = {Bucket:bucketName, Key:fileKey,  Body: fileContents, ACL:'public-read'};
   console.log('[saveToBucket] saveParams:', saveParams);
-  var s3bucket = new aws.S3();
-  s3bucket.putObject(saveParams, function(err, data){
+  s3.putObject(saveParams, function(err, data){
   	//[TODO] Add putting object ACL (make public)
     if(!err){
       console.log('[saveToBucket] file saved successfully. Returning:', data);

@@ -8,20 +8,15 @@ var _ = require('underscore');
 var q = require('q');
 var fileStorage = require('../lib/fileStorage');
 /**
- * @api {get} /applications Get Applications list
- * @apiName GetApplication
- * @apiGroup Application
+ * @api {get} /applications Get list of buckets
+ * @apiName GetBuckets
+ * @apiGroup Admin
  *
- * @apiParam {String} name Name of Application
- *
- * @apiSuccess {Object} applicationData Object containing applications data.
+ * @apiSuccess {Array} buckets List of buckets
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
- *     {
- *       "name": "App1",
- *       "owner": {username:"Doe"}
- *     }
+ *		[{bucketData}]
  *
  */
 exports.getBuckets = function(req, res, next){
@@ -32,6 +27,18 @@ exports.getBuckets = function(req, res, next){
 		res.status(500).send(err);
 	})
 };
+/**
+ * @api {delete} /applications Get list of buckets
+ * @apiName DeleteBucket
+ * @apiGroup Admin
+ *
+ * @apiSuccess {Object} deletedBucket Bucket that was deleted
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *		{bucketData}
+ *
+ */
 exports.deleteBucket = function(req, res, next){
 	fileStorage.deleteBucket(req.params.name).then(function(bucket){
 		console.log("bucket deleted successfully");

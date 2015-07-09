@@ -66,6 +66,13 @@ angular.module('hypercubeServer')
       templateUrl:'roles/role.html',
       controller:'RoleCtrl'
     })
+    .state('buckets', {
+      parent:'nav',
+      url:'/buckets',
+      authorizedRoles:[USER_ROLES.admin, USER_ROLES.editor, USER_ROLES.user],
+      templateUrl:'buckets/buckets.html',
+      controller:'BucketsCtrl'
+    })
     .state('signup', {
       parent:'nav',
       url:'/signup',

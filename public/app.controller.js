@@ -1,6 +1,6 @@
 angular.module('hypercubeServer')
 
-  .controller('AppCtrl', ['$scope', '$state', '$mdToast', 'AuthService',  function ($scope, $state, $mdToast, AuthService) {
+  .controller('AppCtrl', ['$scope', '$state', '$mdToast','$mdDialog', 'AuthService',  function ($scope, $state, $mdToast, $mdDialog, AuthService) {
     $scope.toastPosition = {
       left: false,
       right: true,

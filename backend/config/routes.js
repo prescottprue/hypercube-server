@@ -84,9 +84,9 @@ module.exports =  {
 			controller:appCtrls.files
 		},
 		{
-			type:'PUT',
-			endpoint: '/apps/:name/upload',
-			controller:appCtrls.uploadDir
+			type:'POST',
+			endpoint: '/apps/:name/publish',
+			controller:appCtrls.publishFile
 		},
 		{
 			type:'POST',

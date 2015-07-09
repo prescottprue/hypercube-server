@@ -220,7 +220,7 @@ exports.files = function(req, res, next){
  *
  */
  var localDir = "./public";
-exports.uploadDir = function(req, res, next){
+exports.publishFile = function(req, res, next){
 	console.log('dir upload request with app name: ' + req.params.name + ' with body:', req.body);
 	//TODO: Check that user is owner or collaborator before uploading
 	//TODO: Lookup application and run uploadFile function
@@ -234,11 +234,12 @@ exports.uploadDir = function(req, res, next){
 			}
 			console.log('foundApp:', foundApp);
 			//TODO: Get url from found app, and get localDir from
-			foundApp.uploadDir({bucket:req.params.name, localDir:localDir}).then(function (webUrl){
+			foundApp.publishFile({content:req.body.content, key:req.body.key}).then(function (webUrl){
 				console.log('Buckets web url:', webUrl);
 				res.send(webUrl);
 			}, function (err){
-				res.status(400).send('Error saving file:', err);
+				console.log('Error publishing file:', err);
+				res.status(400).send(err);
 			});
 		});
 	} else {

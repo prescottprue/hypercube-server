@@ -11,7 +11,9 @@ angular.module('hypercubeServer', [
     'hypercubeServer.home', 
     'hypercubeServer.roles', 
     'hypercubeServer.users',
-    'hypercubeServer.applications'
+    'hypercubeServer.applications',
+    'hypercubeServer.buckets'
+
 
   ])
 .config(function ($httpProvider) {
