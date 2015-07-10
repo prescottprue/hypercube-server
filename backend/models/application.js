@@ -8,7 +8,8 @@ var ApplicationSchema = new mongoose.Schema({
 	owner:{type: mongoose.Schema.Types.ObjectId, ref:'User'},
 	name:{type:String, default:'', unique:true, index:true},
 	frontend:{
-		url:{type:String, default:''}, 
+		siteUrl:{type:String, default:''},
+		bucketUrl:{type:String, default:''},
 		provider:{type:String, default:'Amazon'}, 
 		bucketName:{type:String, default:''}
 	},
@@ -48,7 +49,7 @@ ApplicationSchema.methods = {
 		fileStorage.createBucket(bucketName).then(function(bucket){
 			console.log("[createStorage()] New storage created:", bucket);
 			// TODO: Add url and website url to frontend data
-			self.frontend = {bucketName:bucketName, provider:'Amazon'};
+			self.frontend = {bucketName:bucketName, provider:'Amazon', siteUrl:bucketName+".s3-website-us-east-1.amazonaws.com", bucketUrl:"s3.amazonaws.com/"+bucketName};
 			console.log('[createStorage()] about to save new with bucket info:', self);
 			self.saveNew().then(function (appWithStorage){
 				console.log('[createStorage()]AppsWithStorage saved with storage:', appWithStorage);
