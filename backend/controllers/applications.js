@@ -234,7 +234,7 @@ exports.publishFile = function(req, res, next){
 			}
 			console.log('foundApp:', foundApp);
 			//TODO: Get url from found app, and get localDir from
-			foundApp.publishFile({content:req.body.content, key:req.body.key}).then(function (webUrl){
+			foundApp.publishFile({content:req.body.content, key:req.body.key, contentType:req.body.contentType}).then(function (webUrl){
 				console.log('Buckets web url:', webUrl);
 				res.send(webUrl);
 			}, function (err){

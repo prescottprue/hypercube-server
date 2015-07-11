@@ -280,13 +280,17 @@ function setBucketWebsite(bucketName){
 /** Upload file contents to S3 given bucket, file key and file contents
  * @function saveToBucket
  * @params {string} bucketName - Name of bucket to upload to
- * @params {string} fileKey - Key of file to save
- * @params {string} fileContents - File contents in string form
+ * @params {object} fileData - Object containing file information
+ * @params {string} fileData.key - Key of file to save
+ * @params {string} fileData.content - File contents in string form
  */
-function saveToBucket(bucketName, fileKey, fileContents){
+function saveToBucket(bucketName, fileData){
 	console.log('[saveToBucket] saveToBucket called', arguments);
   var d = q.defer();
-  var saveParams = {Bucket:bucketName, Key:fileKey,  Body: fileContents, ACL:'public-read'};
+  var saveParams = {Bucket:bucketName, Key:fileData.key,  Body: fileData.content, ACL:'public-read'};
+  if(_.has(fileData, 'contentType')){
+  	saveParams.ContentType = fileData.contentType;
+  }
   console.log('[saveToBucket] saveParams:', saveParams);
   s3.putObject(saveParams, function(err, data){
   	//[TODO] Add putting object ACL (make public)

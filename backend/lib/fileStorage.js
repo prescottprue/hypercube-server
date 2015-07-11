@@ -32,8 +32,8 @@ exports.saveFile = function(bucketName, fileData){
 	if(!_.has(fileData, 'content')){
 		console.error('File content required to save');
 	}
-	console.log('calling s3.saveFile with BucketName:' + bucketName + " key: " + fileData.key);
-	return s3.saveFile(bucketName, fileData.key, fileData.content);
+	console.log('calling s3.saveFile with BucketName:' + bucketName + " key: " + fileData);
+	return s3.saveFile(bucketName, fileData);
 };
 exports.uploadLocalDir = function(uploadData){
 	uploadData.bucket = uploadData.bucket;
@@ -43,23 +43,3 @@ exports.signedUrl = function(urlData){
 	urlData.bucket = urlData.bucket;
 	return s3.getSignedUrl(urlData);
 };
-	//File type if statements
-	// if (fileType=='html') {
-	// 	contentType = 'text/html'
-	// } else if(fileType=='js') {
-	// 	contentType = 'application/javascript'
-	// } else if(fileType=='css') {
-	// 	contentType = 'text/css'
-	// } else if(fileType=='json') {
-	// 	contentType = 'application/json'
-	// } else if(fileType=='jpg'||fileType=='jpeg'||fileType=='jpe') {
-	// 	contentType = 'image/jpeg'
-	// } else if(fileType=='png') {
-	// 	contentType = 'image/png'
-	// } else if(fileType=='gif') {
-	// 	contentType = 'image/gif'
-	// } else if(fileType=='svg') {
-	// 	contentType = 'image/svg+xml'
-	// } else {
-	// 	contentType = 'application/octet-stream'
-	// }
