@@ -2,23 +2,24 @@
 var conf = require('../config/default');
 var mongoose = require('mongoose');
 var dbUrl = conf.config.db.url;
+
 //Add db name to url
 if(conf.config.db.name){
 	dbUrl += "/" + conf.config.db.name
 }
 
 console.log('Connecting to mongo url:', dbUrl);
-var hypercube = mongoose.createConnection(dbUrl);
+var mongoDb = mongoose.createConnection(dbUrl);
 
-hypercube.on('error',function (err) {
+mongoDb.on('error',function (err) {
 	console.error('Mongoose error:', err);
 });
-hypercube.on('connected', function () {
-	console.error('Connected to DB');
+mongoDb.on('connected', function () {
+	console.log('Connected to DB: ' + dbUrl);
 });
-hypercube.on('disconnected', function () {
+mongoDb.on('disconnected', function () {
 	console.error('Disconnected from DB');
 });
 
-exports.hypercube = hypercube;
+exports.hypercube = mongoDb;
 

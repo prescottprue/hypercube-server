@@ -252,7 +252,7 @@ function setBucketCors(bucketName){
 
 /** Set website configuration for an S3 bucket
 * @function setBucketWebsite
-* @params {string} newBucketName Name of bucket for which to set website configuration
+* @params {string} bucketName Name of bucket for which to set website configuration
 */
 function setBucketWebsite(bucketName){
 	console.log('[setBucketWebsite()] setBucketWebsite called:', bucketName);
@@ -276,7 +276,28 @@ function setBucketWebsite(bucketName){
 	});
 	return d.promise;
 }
-
+/** Set security policy for an S3 bucket
+* @function setBucketPolicy
+* @params {string} bucketName Name of bucket for which to set security policy
+*/
+function setBucketPolicy(bucketName, policy){
+	var params = {
+	  Bucket: bucketName, /* required */
+	  Policy: policy, /* required */
+	};
+	var d = q.defer();
+	s3.putBucketPolicy(params, function(err, data) {
+	  if (err) {
+	  	console.log(err, err.stack); 
+	  	d.reject(err);
+	  }// an error occurred
+	  else{
+	 		console.log('Bucket policy set successfully:', data);           // successful response
+	 		d.resolve(data);
+		}
+	});
+	return d.promise;
+}
 /** Upload file contents to S3 given bucket, file key and file contents
  * @function saveToBucket
  * @params {string} bucketName - Name of bucket to upload to

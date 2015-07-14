@@ -1,4 +1,6 @@
 var db = require('./../lib/db');
+var cognito = require('../lib/cognito');
+
 var mongoose = require('mongoose');
 var _ = require('underscore');
 var sessionCtrls = require('../controllers/session');
@@ -7,7 +9,6 @@ var Q = require('q');
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcrypt');
 var config = require('../config/default').config;
-
 //Schema Object
 //collection name
 //model name
@@ -88,13 +89,13 @@ UserSchema.methods = {
 		});
 		return d.promise;
 	},
+	//Encode a JWT with user info
 	generateToken: function(session){
-		//Encode a JWT with user info
 		var tokenData = this.tokenData();
 		tokenData.sessionId = session._id;
 		return jwt.sign(tokenData, config.jwtSecret);
 	},
-	//Wrap query in promise
+	//Wrap save callback in promise
 	saveNew:function(){
 		var d = Q.defer();
 		this.save(function (err, result){
@@ -189,6 +190,10 @@ UserSchema.methods = {
 			d.reject(err);
 		});
 		return d.promise;
+	},
+	getCognitoToken:function(){
+		console.log('User.getCognitoToken called with id:' + this._id);
+		return cognito.getToken(this._id);
 	}
 };
 /*

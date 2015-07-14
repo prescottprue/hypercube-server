@@ -8,7 +8,6 @@ var _ = require('underscore');
 var User = require('../models/user').User;
 var Session = require('../models/session').Session;
 
-
 /**
  * @api {post} /signup Sign up a new user and start a session as that new user
  * @apiName Signup
@@ -33,10 +32,11 @@ var Session = require('../models/session').Session;
 exports.signup = function(req, res, next){
 	var query;
 	console.log('Signup request with :', req.body);
-	//Check for username or email
+	//Check for username and email
 	if(!_.has(req.body, "username") && !_.has(req.body, "email")){
 		res.status(400).json({code:400, message:"Username or Email required to signup"});
 	}
+	//Look for username or email
 	if(_.has(req.body, "username")){
 		query = User.findOne({"username":req.body.username}); // find using username field
 	} else {
@@ -108,8 +108,9 @@ exports.login = function(req, res, next){
 			currentUser.login(req.body.password).then(function(token){
 				console.log('[AuthCtrl.login] Login Successful. Token:', token);
 				res.send({token:token, user:currentUser.strip()});
-			}, function(err){
+			}, function (err){
 				//TODO: Handle wrong password
+				console.log('Login error:', err);
 				res.status(400).send('Login Error:', err);
 			});
 		});
