@@ -30,7 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //Protect all routes except allowedPaths by requiring Authorization header
 var allowedPaths = ['/', '/login', '/signup', '/docs'];
-app.use(jwt({secret: config.jwtSecret}).unless({path:allowedPaths}));
+// app.use(jwt({secret: config.jwtSecret}).unless({path:allowedPaths}));
 
 //Set cors configuration
 app.use(cors())
