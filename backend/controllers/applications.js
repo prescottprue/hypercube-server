@@ -60,10 +60,15 @@ exports.get = function(req, res, next){
  */
 exports.add = function(req, res, next){
 	//Query for existing application with same _id
-	if(!_.has(req.body, "name") || !_.has(req.body, "owner")){
-		res.status(400).send("Name and Owner Id are required to create a new app");
+	if(!_.has(req.body, "name")){
+		res.status(400).send("Name is required to create a new app");
 	} else {
 		console.log('add request with name: ' + req.body.name + ' with body:', req.body);
+		var appData = _.extend({}, req.body);
+		if(!_.has(appData, 'owner')){
+			console.log('No owner provided. Using user', req.user);
+			appData.owner = req.user.id;
+		}
 		var query = Application.findOne({"name":req.body.name}); // find using name field
 		query.exec(function (qErr, qResult){
 			if (qErr) { return next(qErr); }
@@ -72,7 +77,6 @@ exports.add = function(req, res, next){
 			}
 			//application does not already exist
 			//TODO: Only add valid appData
-			var appData = req.body;
 			//TODO: Add user data under owner parameter
 			var application = new Application(appData);
 			console.log('about to call create with storage:', appData);
