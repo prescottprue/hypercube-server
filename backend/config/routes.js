@@ -138,11 +138,6 @@ module.exports =  {
 			controller:adminCtrl.getBuckets
 		},
 		{
-			type:'GET',
-			endpoint: '/admin/buckets/:name',
-			controller:adminCtrl.get
-		},
-		{
 			type:'DELETE',
 			endpoint: '/admin/buckets/:name',
 			controller:adminCtrl.deleteBucket

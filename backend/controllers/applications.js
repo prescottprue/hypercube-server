@@ -80,10 +80,13 @@ exports.add = function(req, res, next){
 			//TODO: Add user data under owner parameter
 			var application = new Application(appData);
 			console.log('about to call create with storage:', appData);
-			application.createWithStorage().then(function(newApp){
-				console.log('application created with storage');
+			//TODO: Create storage after new app is created
+			application.saveNew().then(function(newApp){
+				console.log('Application created:', newApp);
 				res.json(newApp);
 			}, function(err){
+				console.log('Error creating new application:', err);
+				//TODO: Handle different errors here
 				res.status(400).send(err);
 			});
 		});
@@ -208,7 +211,7 @@ exports.files = function(req, res, next){
  * @apiName UploadFile
  * @apiGroup Application
  *
- * @apiParam {String} name Name of 
+ * @apiParam {String} name Name of
  * @apiParam {String} content Text string content of file
  * @apiParam {String} filetype Type of file the be uploaded
  *

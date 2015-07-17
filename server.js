@@ -27,13 +27,19 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+//Set cors configuration
+app.use(cors());
 
 //Protect all routes except allowedPaths by requiring Authorization header
 var allowedPaths = ['/', '/login', '/signup', '/docs'];
 app.use(jwt({secret: config.jwtSecret}).unless({path:allowedPaths}));
+//Handle unauthorized errors
+app.use(function (err, req, res, next) {
+  if (err.name === 'UnauthorizedError') {
+    res.status(401).json({message:'Invalid token', code:'UNAUTHORIZED'});
+  }
+});
 
-//Set cors configuration
-app.use(cors())
 
 //Setup routes based on config
 routeBuilder(routes);

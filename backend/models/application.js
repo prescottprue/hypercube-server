@@ -10,12 +10,12 @@ var ApplicationSchema = new mongoose.Schema({
 	frontend:{
 		siteUrl:{type:String, default:''},
 		bucketUrl:{type:String, default:''},
-		provider:{type:String, default:'Amazon'}, 
+		provider:{type:String, default:'Amazon'},
 		bucketName:{type:String, default:''}
 	},
 	// server:{
-	// 	url:{type:String, default:''}, 
-	// 	provider:{type:String, default:'Heroku'}, 
+	// 	url:{type:String, default:''},
+	// 	provider:{type:String, default:'Heroku'},
 	// 	appName:{type:String, default:''}
 	// },
 	groups:[{type:mongoose.Schema.Types.ObjectId, ref:'Group'}],
@@ -86,18 +86,19 @@ ApplicationSchema.methods = {
 		if(!_.has(this, 'frontend') || !_.has(this.frontend, 'bucketName')){
 			console.log('No frontend to remove storage of');
 			d.resolve();
-		}
-		fileStorage.deleteBucket(this.frontend.bucketName).then(function (){
-			console.log('Storage removed successfully');
-			d.resolve();
-		}, function (err){
-			if(err && err.code == "NoSuchBucket"){
-				console.log('Removing storage was not nessesary');
+		} else {
+			fileStorage.deleteBucket(this.frontend.bucketName).then(function (){
+				console.log('Storage removed successfully');
 				d.resolve();
-			} else {
-				d.reject(err);
-			}
-		});
+			}, function (err){
+				if(err && err.code == "NoSuchBucket"){
+					console.log('Removing storage was not nessesary');
+					d.resolve();
+				} else {
+					d.reject(err);
+				}
+			});
+		}
 		return d.promise;
 	},
 	publishFile: function(fileData){
