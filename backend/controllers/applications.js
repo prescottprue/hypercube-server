@@ -76,12 +76,9 @@ exports.add = function(req, res, next){
 				return next(new Error('Application with this name already exists.'));
 			}
 			//application does not already exist
-			//TODO: Only add valid appData
-			//TODO: Add user data under owner parameter
 			var application = new Application(appData);
 			console.log('about to call create with storage:', appData);
-			//TODO: Create storage after new app is created
-			application.saveNew().then(function(newApp){
+			application.createWithStorage().then(function(newApp){
 				console.log('Application created:', newApp);
 				res.json(newApp);
 			}, function(err){
