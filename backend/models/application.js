@@ -46,9 +46,10 @@ ApplicationSchema.methods = {
 		var self = this;
 		var d = q.defer();
 		var bucketName = bucketPrefix + this.name;
+		bucketName = bucketName.toLowerCase();
 		fileStorage.createBucket(bucketName).then(function(bucket){
 			console.log("[createStorage()] New storage created:", bucket);
-			// TODO: Add url and website url to frontend data
+			// TODO: Handle different bucket regions and site urls
 			self.frontend = {bucketName:bucketName, provider:'Amazon', siteUrl:bucketName+".s3-website-us-east-1.amazonaws.com", bucketUrl:"s3.amazonaws.com/"+bucketName};
 			console.log('[createStorage()] about to save new with bucket info:', self);
 			self.saveNew().then(function (appWithStorage){

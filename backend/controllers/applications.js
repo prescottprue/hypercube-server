@@ -84,7 +84,7 @@ exports.add = function(req, res, next){
 			}, function(err){
 				console.log('Error creating new application:', err);
 				//TODO: Handle different errors here
-				res.status(400).send(err);
+				res.status(400).json(err);
 			});
 		});
 	}

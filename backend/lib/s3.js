@@ -155,7 +155,8 @@ function getBuckets(){
 * @params {string} bucketName Name of bucket to create
 */
 function createS3Bucket(bucketName){
-	console.log('createS3Bucket called', bucketName)
+	console.log('createS3Bucket called', bucketName);
+	var newBucketName = bucketName.toLowerCase();
 	var d = q.defer();
 	// var s3bucket = new aws.S3();
 	// if(aws.config)
@@ -163,7 +164,7 @@ function createS3Bucket(bucketName){
 	if(!aws.config.credentials){
 		d.reject(new Error('AWS Credentials are required to access S3'));
 	} else {
-		s3.createBucket({Bucket: bucketName, ACL:'public-read'},function(err, data) {
+		s3.createBucket({Bucket: newBucketName, ACL:'public-read'},function(err, data) {
 			if(err){
 				console.error('[createS3Bucket] error creating bucket:', err);
 				d.reject({status:500, error:err});
@@ -172,7 +173,7 @@ function createS3Bucket(bucketName){
 				// Setup Bucket website
 				var dataContents = data.toString();
 				// TODO: Return more accurate information here
-				d.resolve({name:bucketName, websiteUrl:""});
+				d.resolve({name:newBucketName.toLowerCase(), websiteUrl:""});
 			}
 		});
 	}
