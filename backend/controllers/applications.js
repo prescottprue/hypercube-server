@@ -250,3 +250,48 @@ exports.publishFile = function(req, res, next){
 		res.status(400).send('Application name and fileData are required to upload file')
 	}
 };
+
+/**
+ * @api {put} /applications/:name/  Update a application
+ * @apiName applyTemplate
+ * @apiGroup Application
+ *
+ * @apiParam {String} name Name of template
+ *
+ * @apiSuccess {Object} applicationData Object containing updated applications data.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "name": "App1",
+ *       "owner": {username:"Doe"}
+ *     }
+ *
+ *
+ */
+ //TODO: Allow for deleteing/not deleteing all of the bucket files before applying template
+exports.applyTemplate = function(req, res, next){
+	console.log('apply template request with app name: ' + req.params.name + ' with body:', req.body);
+	//TODO: Check that user is owner or collaborator before uploading
+	//TODO: Lookup application and run uploadFile function
+	if(req.params.name){ //Get data for a specific application
+		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
+		isList = false;
+		query.exec(function (err, foundApp){
+			if(err) { return next(err);}
+			if(!foundApp){
+				return next (new Error('Application could not be found'));
+			}
+			//TODO: Get url from found app, and get localDir from
+			foundApp.applyTemplate(req.body.name).then(function (webUrl){
+				console.log('Template applied to bucket successfully');
+				res.send(webUrl);
+			}, function (err){
+				console.log('Error applying template:', err);
+				res.status(400).send(err);
+			});
+		});
+	} else {
+		res.status(400).send('Application name and template name are required to upload file');
+	}
+};

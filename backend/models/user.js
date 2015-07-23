@@ -14,7 +14,7 @@ var config = require('../config/default').config;
 
 var UserSchema = new mongoose.Schema(
 	{
-		username:{type:String, index:true},
+		username:{type:String, index:true, unique:true},
 		name:{type: String, default:''},
 		email:{type: String, default:'', index:true},
 		title:{type: String, default:''},
@@ -57,15 +57,11 @@ UserSchema.methods = {
 		var d = Q.defer();
 		var self = this;
 		//Check password
-		console.log("[User.login()] Compare returned:", passwordAttempt);
 		self.comparePassword(passwordAttempt).then(function(){
 			//Start new session
-			console.log("[User.login()] Passwords match");
 			self.startSession().then(function(sessionInfo){
 				//Create Token
-				console.log("[User.login()] Session started:", sessionInfo);
 				var token = self.generateToken(sessionInfo);
-				console.log("[User.login()] Token Generated:", token);
 				d.resolve(token);
 			}, function(err){
 				d.reject(err);
@@ -79,7 +75,6 @@ UserSchema.methods = {
 		var self = this;
 		var d = Q.defer();
 		bcrypt.compare(passwordAttempt, self.password, function(err, passwordsMatch){
-			console.log("[User.checkPassword()] Compare returned:", err, passwordsMatch);
 			if(err){d.reject(err);}
 			if(!passwordsMatch){
 				d.reject(new Error('Invalid authentication credentials'));
@@ -115,14 +110,12 @@ UserSchema.methods = {
 		 */
 		//Session does not already exist
 		var deferred = Q.defer();
-		console.log('[User.startSession()] Starting session for user with id:', this._id);
 		var session = new Session({userId:this._id});
 		session.save(function (err, result) {
 			if (err) { deferred.reject(err); }
 			if (!result) {
 				deferred.reject(new Error('Session could not be added.'));
 			}
-			console.log('[User.startSession()] Session started successfully. Returning:', result);
 			deferred.resolve(result);
 		});
 		return deferred.promise;
@@ -141,13 +134,12 @@ UserSchema.methods = {
 			console.log('[User.endSession()] Session update:', err, affect, result);
 			if (err) { deferred.reject(err); }
 			if (!result) {
+				console.log('Error finding session to end');
 				deferred.reject(new Error('Session could not be added.'));
 			}
 			if(affect.nModified != 1){
 				console.log('[User.endSession()] Multiple sessions were ended', affect);
 			}
-			console.log('[User.endSession()] Returning', result);
-
 			deferred.resolve(result);
 		});
 		return deferred.promise;
@@ -178,9 +170,7 @@ UserSchema.methods = {
 		var self = this;
 		self.hashPassword(password).then(function (hashedPass){
 			self.password = hashedPass;
-			console.log('[User.createWithPass()] Password hashed successfully');
 			self.saveNew().then(function(newUser){
-				console.log('[User.createWithPass()] New user created:', newUser);
 				d.resolve(newUser);
 			}, function(err){
 				d.reject(err);

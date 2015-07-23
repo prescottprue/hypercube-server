@@ -16,8 +16,8 @@ module.exports = function(grunt){
 		},
 		nodemon:{
 			local:{
-				script: 'bin/www',
-				ignore:['node_modules/**'],
+				script: 'server.js',
+				ignore:['node_modules/**', '.elasticbeanstalk'],
 				options: {
           nodeArgs: ['--debug'],
 	        env:{

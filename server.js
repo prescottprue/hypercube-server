@@ -8,6 +8,8 @@ _ = require('underscore'),
 jwt = require('express-jwt'),
 config = require('./backend/config/default').config,
 cors = require('cors');
+systemUtils = require('./lib/systemUtils');
+
 
 var app = express();
 
@@ -84,9 +86,26 @@ app.use(function (err, req, res, next) {
   });
 });
 
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = systemUtils.normalizePort(process.env.PORT || '3000');
+console.log('localhost port:', port);
+app.set('port', port);
+
+var server = systemUtils.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+
 
 module.exports = app;
 /**
  * Load view helpers
  */
 require('./app-locals');
+

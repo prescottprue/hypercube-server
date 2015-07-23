@@ -83,7 +83,6 @@ exports.signup = function(req, res, next){
  *
  */
 exports.login = function(req, res, next){
-	console.log('[AuthCtrl.login] Login request with :', req.body);
 	var query;
 	if(!_.has(req.body, "username") && !_.has(req.body, "email")){
 		res.status(400).json({code:400, message:"Username or Email required to login"});
@@ -93,10 +92,9 @@ exports.login = function(req, res, next){
 		} else {
 			query = User.findOne({"email":req.body.email}); // find using email field
 		}
-		console.log('[AuthCtrl.login] Login user query:', query);
 		query.exec(function (err, currentUser){
 			if(err) { 
-				console.error('Login error:', err);
+				console.error('[AuthCtrl.login] Login error:', err);
 				return next(err);
 			}
 			if(!currentUser){
@@ -104,13 +102,12 @@ exports.login = function(req, res, next){
 				// return next (new Error('User could not be found'));
 				return res.status(401).send('Invalid Authentication Credentials');
 			}
-			console.log('[AuthCtrl.login] User found:', currentUser);
 			currentUser.login(req.body.password).then(function(token){
-				console.log('[AuthCtrl.login] Login Successful. Token:', token);
+				// console.log('[AuthCtrl.login] Login Successful. Token:', token);
 				res.send({token:token, user:currentUser.strip()});
 			}, function(err){
 				//TODO: Handle wrong password
-				res.status(400).send('Login Error:', err);
+				res.status(400).send('[AuthCtrl.login] Login Error:', err);
 			});
 		});
 	}
@@ -133,12 +130,12 @@ exports.login = function(req, res, next){
 exports.logout = function(req, res, next){
 	//TODO:Invalidate token
 	var user = new User(req.user);
-	console.log('ending users session:', user);
+	// console.log('ending users session:', user);
 	user.endSession().then(function(){
-		console.log('successfully ended session');
+		// console.log('successfully ended session');
 		res.status(200).send({message:'Logout successful'});
-	}, function(){
-		console.log('Error ending session');
+	}, function(err){
+		console.log('Error ending session:', err);
 		res.send({message:'Error ending session'});
 	});
 };
@@ -161,7 +158,7 @@ exports.logout = function(req, res, next){
  */
 exports.verify = function(req, res, next){
 	//TODO:Actually verify user instead of just returning user data
-	console.log('verify request:', req.user);
+	// console.log('verify request:', req.user);
 	var query;
 	if(req.user){
 		//Find by username in token
@@ -173,7 +170,7 @@ exports.verify = function(req, res, next){
 			query = User.findOne({email:req.user.email});
 		}
 		query.exec(function (err, result){
-			console.log('verify returned:', result, err);
+			// console.log('verify returned:', result, err);
 			if (err) { return next(err); }
 			if(!result){ //Matching user already exists
 				// TODO: Respond with a specific error code

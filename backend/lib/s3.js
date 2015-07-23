@@ -7,36 +7,21 @@ s3Sdk = require('s3'),
 q = require('q'),
 _ = require('underscore');
 
+//Load config variables
 var conf = require('../config/default').config;
 
-var s3 = configureS3AndGetClient();
+//Setup S3 Config
+var sourceS3Conf = new aws.Config({
+  accessKeyId: conf.s3.key,
+  secretAccessKey: conf.s3.secret
+});
+var s3 = new aws.S3(sourceS3Conf);
 var s3Client = s3Sdk.createClient({
-		s3Options:{
-			accessKeyId: conf.s3.key,
-			secretAccessKey: conf.s3.secret
-		}
-	});
-/** Set S3 credentials from environment variables if they are availble and return the s3 s3 object
- * @function configureS3AndGetClient
- */
- // TODO: Find out why this isn't working
-function configureS3AndGetClient(){
-	if(_.has(conf.s3, "key") && _.has(conf.s3, "secret")){
-		console.log('logging into s3 with key:', conf.s3.key + " and secret " + conf.s3.secret);
-		aws.config.update({
-			accessKeyId:conf.s3.key,
-			secretAccesssKey:conf.s3.secret
-		});
-		//TODO: Configure more settings on s3
-		var s3 = new aws.S3(aws.config);
-		return s3;		
-	} else {
-		console.error('Environment not setup properly. Check S3 Keys');
+	s3Options:{
+		accessKeyId: conf.s3.key,
+		secretAccessKey: conf.s3.secret
 	}
-}
-
-
-
+});
 
 /** Create new S3 bucket and set default cors settings, and set index.html is website
  * @function createBucketSite
@@ -162,7 +147,7 @@ function createS3Bucket(bucketName){
 	// if(aws.config)
 	console.log('aws config:', aws.config);
 	if(!aws.config.credentials){
-		d.reject(new Error('AWS Credentials are required to access S3'));
+		d.reject(new Error('aws Credentials are required to access S3'));
 	} else {
 		s3.createBucket({Bucket: newBucketName, ACL:'public-read'},function(err, data) {
 			if(err){

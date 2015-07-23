@@ -94,6 +94,11 @@ module.exports =  {
 			controller:appCtrls.add
 		},
 		{
+			type:'POST',
+			endpoint: '/apps/:name/template',
+			controller:appCtrls.applyTemplate
+		},
+		{
 			type:'PUT',
 			endpoint: '/apps/:name',
 			controller:appCtrls.update
