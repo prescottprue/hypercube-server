@@ -46,6 +46,24 @@ ApplicationSchema.methods = {
 		});
 		return d.promise;
 	},
+	createWithTemplate:function(templateName){
+		var self = this;
+		var d = q.defer();
+		this.createWithStorage().then(function (newApplication){
+			// console.log('[application.createWithStorage] new app saved successfully', newApplication);
+			self.applyTemplate(templateName).then(function(){
+				// console.log('[application.createWithStorage] storage created successfully', newApplication);
+				d.resolve(newApplication);
+			}, function (err){
+				console.log('[Application.createWithStorage] error creating storage', err);
+				d.reject(err);
+			});
+		}, function (err){
+			console.log('[Application.createWithStorage] error saving new', err);
+			d.reject(err);
+		});
+		return d.promise;
+	},
 	createWithStorage:function(){
 		var self = this;
 		var d = q.defer();

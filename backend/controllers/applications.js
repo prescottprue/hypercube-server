@@ -78,14 +78,25 @@ exports.add = function(req, res, next){
 			//application does not already exist
 			var application = new Application(appData);
 			console.log('about to call create with storage:', appData);
-			application.createWithStorage().then(function(newApp){
-				console.log('Application created:', newApp);
-				res.json(newApp);
-			}, function(err){
-				console.log('Error creating new application:', err);
-				//TODO: Handle different errors here
-				res.status(400).json(err);
-			});
+			if(_.has(req.body,'template')){
+				application.createWithTemplate(req.body.template).then(function (newApp){
+					console.log('Application created with template:', newApp);
+					res.json(newApp);
+				}, function(err){
+					console.log('Error creating new application:', err);
+					//TODO: Handle different errors here
+					res.status(400).json(err);
+				});
+			} else {
+				application.createWithStorage().then(function (newApp){
+					console.log('Application created with storage:', newApp);
+					res.json(newApp);
+				}, function(err){
+					console.log('Error creating new application:', err);
+					//TODO: Handle different errors here
+					res.status(400).json(err);
+				});
+			}
 		});
 	}
 };
