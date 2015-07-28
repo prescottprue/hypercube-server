@@ -2,6 +2,9 @@ var conf = require('./config.json');
 module.exports = function(grunt){
 	var serverFolder = "backend/";
 	var frontFolder = "public/";
+	var mongoShutdownCmd = "db.getSiblingDB('admin').shutdownServer()";
+	var dbShutdownCmd = 'mongo --eval "' + mongoShutdownCmd + '"';
+	console.log('shutdowncmd:', dbShutdownCmd);
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		concurrent:{
@@ -37,6 +40,17 @@ module.exports = function(grunt){
 			}
 		},
 		shell: {
+			killMongod:{
+				command:dbShutdownCmd,
+				options: {
+          stdout: false,
+          stderr: true,
+          failOnError: false,
+          execOptions: {
+            cwd: '.'
+          }
+      	}
+			},
     	mongodb: {
       	command: 'mongod --dbpath /data/db',
       	options: {

@@ -127,7 +127,14 @@ exports.update = function(req, res, next){
 		Application.update({name:req.params.name}, req.body, {upsert:false}, function (err, numberAffected, result) {
 			if (err) { return next(err); }
 			//TODO: respond with updated data instead of passing through req.body
-			res.json(req.body);
+			
+			console.log('Application update successful. Num affected:', numberAffected);
+			if(numberAffected.nModified == 0 || numberAffected.n == 0){
+				//TODO: Handle Application not found
+				res.status(400).send({message:'Application not found'});
+			} else {
+				res.json(req.body);
+			}
 		});
 	} else {
 		res.status(400).send({message:'Application id required'});
