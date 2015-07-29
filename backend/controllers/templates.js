@@ -76,7 +76,7 @@ exports.add = function(req, res, next){
 			}
 			//template does not already exist
 			var template = new Template(appData);
-			template.createNew().then(function (newTemplate){
+			template.createNew(req).then(function (newTemplate){
 				console.log('Template created successfully:', newTemplate);
 				res.json(newTemplate);
 			}, function(err){

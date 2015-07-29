@@ -36,19 +36,50 @@ TemplateSchema.methods = {
 		});
 		return d.promise;
 	},
-	uploadFiles:function(){
-		//TODO:Accept files from form upload and save to disk
-		//TODO: Upload files from disk to S3
-		fileStorage.uploadDir(self.location, localDirectory).then(function (){
-			d.resolve(newTemplate);
-		}, function (err){
-			d.reject(err);
-		});
-		//TODO: Remove files from disk
+	uploadFiles:function(req){
+		var bucketName,localDirectory;
+		var d = q.defer();
+
+		//Accept files from form upload and save to disk
+		var form = new formidable.IncomingForm(),
+        files = [],
+        fields = [];
+
+    form.uploadDir = "fs";
+    //TODO: Handle on error?
+    form
+      .on('field', function(field, value) {
+        console.log(field, value);
+        fields.push([field, value]);
+      })
+      .on('file', function(field, file) {
+        console.log(field, file);
+        files.push([field, file]);
+      })
+      .on('end', function() {
+        console.log('-> upload done');
+        res.writeHead(200, {'content-type': 'text/plain'});
+        res.write('received fields:\n\n '+util.inspect(fields));
+        res.write('\n\n');
+        res.end('received files:\n\n '+util.inspect(files));
+    		//TODO: Upload files from disk to S3
+				fileStorage.uploadDir(self.location, localDirectory).then(function (){
+					//TODO: Remove files from disk
+					d.resolve(newTemplate);
+				}, function (err){
+					d.reject(err);
+				});
+      });
+    //Parse form
+    form.parse(req, function(err){
+    	if(err){
+    		d.reject(err);
+    	}
+    });
+    return d.promise;
 	},
 	createNew: function(){
 		var d = q.defer();
-		var bucketName,localDirectory;
 		var self = this;
 		//TODO: Verify that name is allowed to be used for bucket
 		this.saveNew().then(function (){
