@@ -23,12 +23,11 @@ exports.doOnReceive = function(action){
 exports.add = function(body, attrs){
 	//action, src, dest, author
 	var d = q.defer();
-	 var params = {
+	var params = {
     MessageBody: body,
     QueueUrl: sqsQueueUrl,
     DelaySeconds: 0,
     MessageAttributes:{
-
     }
   };
   sqs.sendMessage(params, function (err, data) {
@@ -42,7 +41,6 @@ exports.add = function(body, attrs){
   });
   return d.promise;
 };
-
 
 function sendMessage(messageBody, messageAttrs){
 	//action, src, dest, author
