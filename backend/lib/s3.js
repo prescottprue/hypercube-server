@@ -281,18 +281,23 @@ function saveToBucket(bucketName, fileData){
 
 /** Upload local directory contents to provided S3 Bucket
  * @function saveToBucket
- * @params {string} bucketName - Name of bucket to upload files to
+ * @params {string} bucketPath - Name or Name/location of bucket to upload files to
  * @params {string} localDir - Local directory to upload to S3
  */
-function uploadDirToBucket(bucketName, localDir){
+function uploadDirToBucket(bucketPath, localDir){
 	// console.log('uploadDirToBucket called:', bucketName);
-	var newAppDir = 'fs/'+ bucketName;
+	var prefix = "", bucketName = bucketPath;
+	var bucketPathArray = bucketName.split("/");
+	if(bucketPathArray.length > 0){
+		bucketName = bucketPathArray[0];
+		prefix = bucketPathArray.shift();
+	}
 	var d = q.defer();
 	var upParams = {
 	  localDir: localDir,
 	  s3Params: {
 	    Bucket: bucketName,
-	    Prefix: "",
+	    Prefix: prefix,
 	    ACL:'public-read'
 	  },
 	};

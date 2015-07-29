@@ -82,7 +82,8 @@ ApplicationSchema.methods = {
 		});
 		return d.promise;
 	},
-	createStorage:function(){
+	createStorage:function(storageData){
+		//TODO: Handle storageData including provider and name prefix
 		var self = this;
 		var d = q.defer();
 		var bucketName = bucketPrefix + this.name;

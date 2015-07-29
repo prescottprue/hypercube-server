@@ -3,8 +3,10 @@ var indexCtrls = require('../controllers/index');
 var authCtrls = require('../controllers/auth');
 var userCtrls = require('../controllers/users');
 var appCtrls = require('../controllers/applications');
+var templateCtrls = require('../controllers/templates');
 var rolesCtrl = require('../controllers/roles');
 var adminCtrl = require('../controllers/admin');
+
 
 
 module.exports =  {
@@ -104,9 +106,36 @@ module.exports =  {
 			controller:appCtrls.update
 		},
 		{
+			type:'PUT',
+			endpoint: '/apps/:name/storage',
+			controller:appCtrls.addStorage
+		},
+		{
 			type:'DELETE',
 			endpoint: '/apps/:name',
 			controller:appCtrls['delete']
+		}
+	],
+	templates:[
+		{
+			type:'GET',
+			endpoint: '/templates',
+			controller:templateCtrls.get
+		},
+		{
+			type:'GET',
+			endpoint: '/templates/:name',
+			controller:templateCtrls.get
+		},
+		{
+			type:'POST',
+			endpoint: '/templates',
+			controller:templateCtrls.add
+		},
+		{
+			type:'DELETE',
+			endpoint: '/templates/:name',
+			controller:templateCtrls['delete']
 		}
 	],
 	roles:[
