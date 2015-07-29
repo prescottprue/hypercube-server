@@ -288,9 +288,10 @@ function uploadDirToBucket(bucketPath, localDir){
 	// console.log('uploadDirToBucket called:', bucketName);
 	var prefix = "", bucketName = bucketPath;
 	var bucketPathArray = bucketName.split("/");
+	console.log('bucketPathArray:', bucketPathArray);
 	if(bucketPathArray.length > 0){
 		bucketName = bucketPathArray[0];
-		prefix = bucketPathArray.shift();
+		prefix = bucketPathArray.slice(1).join("/");
 	}
 	var d = q.defer();
 	var upParams = {

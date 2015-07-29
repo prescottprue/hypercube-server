@@ -5,6 +5,10 @@ var q = require('q');
 var _ = require('underscore');
 var sqs = require('./../lib/sqs');
 var templateBucket = "hypercube-templates";
+var formidable = require('formidable');
+var util = require('util');
+var mkdirp = require('mkdirp');
+var rimraf = require('rimraf');
 
 var TemplateSchema = new mongoose.Schema({
 	name:{type:String, default:'', unique:true, index:true},
@@ -13,7 +17,7 @@ var TemplateSchema = new mongoose.Schema({
 	updatedAt: { type: Date, default: Date.now}
 });
 
-TemplateSchema.set('collection', 'applications');
+TemplateSchema.set('collection', 'templates');
 
 TemplateSchema.methods = {
 	saveNew: function(){
@@ -39,15 +43,35 @@ TemplateSchema.methods = {
 	uploadFiles:function(req){
 		var bucketName,localDirectory;
 		var d = q.defer();
+		var self = this;
+		//Create a new directory for template files
 
+		var uploadDir = "fs/templates/" + this.name;
 		//Accept files from form upload and save to disk
 		var form = new formidable.IncomingForm(),
         files = [],
         fields = [];
+    form.uploadDir = uploadDir
+    form.keepExtensions = true;
 
-    form.uploadDir = "fs";
+		mkdirp(form.uploadDir, function(err) { 
+	    // path was created unless there was error
+	    console.log('directory created successfully');
+	    //Parse form
+	    form.parse(req, function(err){
+	    	if(err){
+	    		d.reject(err);
+	    	}
+	    });
+		});
     //TODO: Handle on error?
     form
+	    .on('fileBegin', function(name, file) {
+	    	var pathArray = file.path.split("/");
+	    	var path = _.initial(pathArray);
+	    	path = path.join("/") + "/" + file.name;
+	    	file.path = path;
+			})
       .on('field', function(field, value) {
         console.log(field, value);
         fields.push([field, value]);
@@ -58,35 +82,48 @@ TemplateSchema.methods = {
       })
       .on('end', function() {
         console.log('-> upload done');
-        res.writeHead(200, {'content-type': 'text/plain'});
-        res.write('received fields:\n\n '+util.inspect(fields));
-        res.write('\n\n');
-        res.end('received files:\n\n '+util.inspect(files));
+        console.log('received files:\n\n '+util.inspect(files));
+
+        // res.writeHead(200, {'content-type': 'text/plain'});
+        // res.write('received fields:\n\n '+util.inspect(fields));
+        // res.write('\n\n');
+        // res.end('received files:\n\n '+util.inspect(files));
     		//TODO: Upload files from disk to S3
-				fileStorage.uploadDir(self.location, localDirectory).then(function (){
+    		console.log('upload localdir called with:', self.location);
+				fileStorage.uploadLocalDir({bucket:self.location, localDir:uploadDir}).then(function (){
 					//TODO: Remove files from disk
-					d.resolve(newTemplate);
+					console.log('files upload successful:');
+					rimraf(uploadDir, function (err){
+						if(!err){
+							d.resolve();
+						} else {
+							console.log('Error deleting folder after upload to template');
+							d.reject(err);
+						}
+					});
 				}, function (err){
 					d.reject(err);
 				});
       });
-    //Parse form
-    form.parse(req, function(err){
-    	if(err){
-    		d.reject(err);
-    	}
-    });
+
     return d.promise;
 	},
-	createNew: function(){
+	createNew: function(req){
 		var d = q.defer();
 		var self = this;
 		//TODO: Verify that name is allowed to be used for bucket
 		this.saveNew().then(function (){
-
-		}, function (err){
+			self.uploadFiles(req).then(function (){
+				console.log('New template created and uploaded successfully');
+				d.resolve();
+			}, function (err){
+				console.log('Error uploading files to new template:', err);
 				d.reject(err);
 			});
+		}, function (err){
+			console.log('Error creating new template:', err);
+			d.reject(err);
+		});
 		return d.promise;
 	}
 };

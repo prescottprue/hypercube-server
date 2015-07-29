@@ -133,6 +133,16 @@ module.exports =  {
 			controller:templateCtrls.add
 		},
 		{
+			type:'PUT',
+			endpoint: '/templates/:name',
+			controller:templateCtrls.update
+		},
+		{
+			type:'PUT',
+			endpoint: '/templates/:name/upload',
+			controller:templateCtrls.upload
+		},
+		{
 			type:'DELETE',
 			endpoint: '/templates/:name',
 			controller:templateCtrls['delete']

@@ -36,7 +36,6 @@ exports.saveFile = function(bucketName, fileData){
 	return s3.saveFile(bucketName, fileData);
 };
 exports.uploadLocalDir = function(uploadData){
-	uploadData.bucket = uploadData.bucket;
 	return s3.uploadDir(uploadData.bucket, uploadData.localDir);
 };
 exports.signedUrl = function(urlData){

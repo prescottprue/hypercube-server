@@ -27,7 +27,7 @@ exports.get = function(req, res, next){
 	var isList = true;
 	var query = Template.find({}).populate({path:'owner', select:'username name title email'});
 	if(req.params.name){ //Get data for a specific template
-		console.log('template request with id:', req.params.name);
+		console.log('template get request with id:', req.params.name);
 		query = Template.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
 		isList = false;
 	}
@@ -114,13 +114,54 @@ exports.update = function(req, res, next){
 		Template.update({name:req.params.name}, req.body, {upsert:false}, function (err, numberAffected, result) {
 			if (err) { return next(err); }
 			//TODO: respond with updated data instead of passing through req.body
-			res.json(req.body);
+			console.log('template data update successful:', numberAffected, result);
+			result.uploadFiles(req).then(function(){
+				res.json(req.body);
+			}, function (err){
+				res.status(500).send({message:'Error uploading files to template'});
+			});
 		});
 	} else {
-		res.status(400).send({message:'Template id required'});
+		res.status(400).send({message:'Template name required'});
 	}
 };
-
+/**
+ * @api {put} /templates/:name/upload Update a template
+ * @apiName Upload
+ * @apiGroup Template
+ *
+ * @apiParam {String} name Name of template
+ * @apiParam {Object} owner Owner of template
+ * @apiParam {String} owner.username Template owner's username
+ *
+ * @apiSuccess {Object} templateData Object containing updated templates data.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "name": "App1",
+ *       "owner": {username:"Doe"}
+ *     }
+ *
+ *
+ */
+exports.upload = function(req, res, next){
+	console.log('app update request with name: ' + req.params.name + ' with body:', req.body);
+	if(req.params.name){
+		Template.findOne({name:req.params.name}, function (err, template) {
+			if (err) { return next(err); }
+			//TODO: respond with updated data instead of passing through req.body
+			console.log('template found successfully:', template);
+			template.uploadFiles(req).then(function(){
+				res.json({message:'Files uploaded successfully'});
+			}, function (err){
+				res.status(500).send({message:'Error uploading files to template'});
+			});
+		});
+	} else {
+		res.status(400).send({message:'Template name required'});
+	}
+};
 /**
  * @api {delete} /delete/:id Delete an delete
  * @apiName DeleteTemplate
