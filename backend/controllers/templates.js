@@ -196,13 +196,8 @@ exports.delete = function(req, res, next){
 		if (err) { return next(err); }
 		if (!result) {
 			console.log('no result');
-			return next(new Error('Template could not be deleted.'));
+			return next(new Error('Template does not exist.'));
 		}
-		var app = new Template(result);
-		app.removeStorage().then(function(){
 			res.json(result);
-		}, function(err){
-			res.status(400).send(err);
-		});
 	});
 };
