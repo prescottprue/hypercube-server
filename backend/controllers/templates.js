@@ -25,10 +25,10 @@ var q = require('q');
  */
 exports.get = function(req, res, next){
 	var isList = true;
-	var query = Template.find({}).populate({path:'owner', select:'username name title email'});
+	var query = Template.find({}).populate({path:'author', select:'username name email'});
 	if(req.params.name){ //Get data for a specific template
 		console.log('template get request with id:', req.params.name);
-		query = Template.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
+		query = Template.findOne({name:req.params.name}).populate({path:'author', select:'username name title email'});
 		isList = false;
 	}
 	query.exec(function (err, result){
@@ -64,9 +64,9 @@ exports.add = function(req, res, next){
 	} else {
 		console.log('add request with name: ' + req.body.name + ' with body:', req.body);
 		var appData = _.extend({}, req.body);
-		if(!_.has(appData, 'owner')){
-			console.log('No owner provided. Using user', req.user);
-			appData.owner = req.user.id;
+		if(!_.has(appData, 'author')){
+			console.log('No author provided. Using user', req.user);
+			appData.author = req.user.userId;
 		}
 		var query = Template.findOne({"name":req.body.name}); // find using name field
 		query.exec(function (qErr, qResult){
@@ -75,6 +75,15 @@ exports.add = function(req, res, next){
 				return next(new Error('Template with this name already exists.'));
 			}
 			//template does not already exist
+			//Handle string list of tags as tag param
+			if(_.has(appData, 'tags')){
+				//TODO: Remove spaces from tags if they exist
+				appData.tags = appData.tags.split(",");
+			}
+			if(_.has(appData, 'frameworks')){
+				appData.frameworks = appData.frameworks.split(",");
+			}
+			console.log('creating new template with:', appData);
 			var template = new Template(appData);
 			template.createNew(req).then(function (newTemplate){
 				console.log('Template created successfully:', newTemplate);

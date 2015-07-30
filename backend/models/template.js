@@ -12,7 +12,11 @@ var rimraf = require('rimraf');
 
 var TemplateSchema = new mongoose.Schema({
 	name:{type:String, default:'', unique:true, index:true},
+	author:{type: mongoose.Schema.Types.ObjectId, ref:'User'},
 	location:{type:String},
+	description:{type:String},
+	tags:[{type:String}],
+	frameworks:[{type:String}],
 	createdAt: { type: Date, default: Date.now},
 	updatedAt: { type: Date, default: Date.now}
 });
@@ -59,8 +63,10 @@ TemplateSchema.methods = {
 	    //Parse form
 	    form.parse(req, function(err){
 	    	if(err){
+	    		console.log('error parsing form:', err);
 	    		d.reject(err);
 	    	}
+	    	console.log('Form parsed')
 	    });
 		});
     //TODO: Handle on error?
@@ -113,13 +119,17 @@ TemplateSchema.methods = {
 		var self = this;
 		//TODO: Verify that name is allowed to be used for bucket
 		this.saveNew().then(function (){
-			self.uploadFiles(req).then(function (){
-				console.log('New template created and uploaded successfully');
-				d.resolve();
-			}, function (err){
-				console.log('Error uploading files to new template:', err);
-				d.reject(err);
-			});
+			if(req.files){
+				self.uploadFiles(req).then(function (){
+					console.log('New template created and uploaded successfully');
+					d.resolve();
+				}, function (err){
+					console.log('Error uploading files to new template:', err);
+					d.reject(err);
+				});
+			} else {
+				d.resolve(self);
+			}
 		}, function (err){
 			console.log('Error creating new template:', err);
 			d.reject(err);
