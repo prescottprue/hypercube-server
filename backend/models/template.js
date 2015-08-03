@@ -49,14 +49,13 @@ TemplateSchema.methods = {
 		var uploadDir = "fs/templates/" + this.name;
 		//Accept files from form upload and save to disk
 		var form = new formidable.IncomingForm(),
-        files = [],
-        fields = [];
+    files = [],
+    fields = [];
     form.uploadDir = uploadDir
     form.keepExtensions = true;
 
 		mkdirp(form.uploadDir, function(err) { 
 	    // path was created unless there was error
-	    console.log('directory created successfully');
 	    //Parse form
 	    form.parse(req, function(err){
 	    	if(err){
@@ -73,17 +72,18 @@ TemplateSchema.methods = {
 	    	file.path = path;
 			})
       .on('field', function(field, value) {
-        console.log(field, value);
+        // console.log(field, value);
+        //Handle form fields other than files
         fields.push([field, value]);
       })
       .on('file', function(field, file) {
-        console.log(field, file);
+        // console.log(field, file);
+        //Handle form files
         files.push([field, file]);
       })
       .on('end', function() {
         console.log('-> upload done');
         console.log('received files:\n\n '+util.inspect(files));
-
         // res.writeHead(200, {'content-type': 'text/plain'});
         // res.write('received fields:\n\n '+util.inspect(fields));
         // res.write('\n\n');

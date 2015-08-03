@@ -16,8 +16,6 @@
     "express": "~4.12.4",
     "express-jwt": "^3.0.1",
     "formidable": "^1.0.17",
-    "gcloud": "^0.15.0",
-    "jade": "~1.9.2",
     "jsonwebtoken": "^5.0.1",
     "mkdirp": "^0.5.1",
     "mongoose": "^4.0.4",
@@ -29,7 +27,6 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "cors": "^2.7.1",
     "grunt": "^0.4.5",
     "grunt-apidoc": "^0.10.1",
     "grunt-concurrent": "^1.0.0",
