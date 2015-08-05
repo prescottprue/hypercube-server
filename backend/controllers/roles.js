@@ -9,7 +9,8 @@ var _ = require('underscore');
 var Role = require('../models/role').Role;
 
 /**
- * @api {get} /roles Get roles list
+ * @api {get} /roles Get Role(s)
+ * @apiDescription Get a list (array) of all of current the roles.
  * @apiName GetRole
  * @apiGroup Role
  *
@@ -20,24 +21,30 @@ var Role = require('../models/role').Role;
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {rolename:"Doe"}
+ *       name: "Manager"
+ *       accounts: [{username:"hackerguy1"}]
+ *       createdAt: 1438737438578,
+ *      updatedAt1438737438578
  *     }
  *
  */
 exports.getList = function(req, res, next){
-	var query = Role.find({}).populate({path:"accounts", select:"rolename"});
+	var query = Role.find({}).populate({path:accounts, select:""});
 	query.exec(function (err, result){
-		if(err) { return next(err);}
-		if(!result){
-			return next (new Error('Role could not be found'));
+		if(err) {
+			console.error('Error getting roles list: ' + JSON.stringify(err));
+			res.status(500).json({message:'Error getting roles list.'});
+		} else if(!result){
+			res.status(400).json({message:'Role could not be found'});
+		} else {
+			res.send(result);
 		}
-		res.send(result);
 	});
 };
 
 /**
- * @api {get} /roles Request Roles list
+ * @api {get} /roles Get Role(s)
+ * @apiDescription Get a list (array) of all of current the roles.
  * @apiName GetRole
  * @apiGroup Role
  *
@@ -48,8 +55,10 @@ exports.getList = function(req, res, next){
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {rolename:"Doe"}
+ *       name: "Manager"
+ *       accounts: [{username:"hackerguy1"}]
+ *       createdAt: 1438737438578,
+ *       updatedAt:1438737438578
  *     }
  *
  */
@@ -74,21 +83,23 @@ exports.get = function(req, res, next){
 };
 
 /**
- * @api {post} /roles Add a new role
+ * @api {post} /roles Add Role
+ * @apiDescription Add a new role.
  * @apiName AddRole
  * @apiGroup Role
  *
  * @apiParam {String} name Name of role
  * @apiParam {String} title Title of role
- * @apiParam {Boolean} tempPassword Whether or not to set a temporary password (Also set if there is no password param)
  *
  * @apiSuccess {Object} roleData Object containing newly created roles data.
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {rolename:"Doe"}
+ *       name: "Manager"
+ *       accounts: [{username:"hackerguy1"}]
+ *       createdAt: 1438737438578,
+ *       updatedAt:1438737438578
  *     }
  *
  *
@@ -96,9 +107,9 @@ exports.get = function(req, res, next){
 exports.add = function(req, res, next){
 	//Role does not already exist
 	console.log('role request with:', req.body);
-	if(req.body && _.has(req.body, "name")){
+	if(req.body && _.has(req.body, name)){
 		//TODO: Handle array of accounts
-		var query = Role.findOne({"name":req.body.name}); // find using email field
+		var query = Role.findOne({name:req.body.name}); // find using email field
 		query.exec(function (err, role){
 			if(err) { return next(err);}
 			if(role){
@@ -119,7 +130,8 @@ exports.add = function(req, res, next){
 };
 
 /**
- * @api {put} /roles Update a role
+ * @api {put} /roles Update Role
+ * @apiDescription Update a role.
  * @apiName UpdateRole
  * @apiGroup Role
  *
@@ -130,8 +142,10 @@ exports.add = function(req, res, next){
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {rolename:"Doe"}
+ *       name: "Manager",
+ *       accounts: [{username:"hackerguy1"}]
+ *       createdAt: 1438737438578,
+ *       updatedAt:1438737438578
  *     }
  *
  *
@@ -147,7 +161,8 @@ exports.update = function(req, res, next){
 };
 
 /**
- * @api {delete} /role/:id Delete a role
+ * @api {delete} /role/:id Delete Role
+ * @apiDescription Delete a role.
  * @apiName DeleteRole
  * @apiGroup Role
  *
@@ -158,8 +173,10 @@ exports.update = function(req, res, next){
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "user",
- *       "accounts": [{username:"scott"}]
+ *       name: "Manager",
+ *       accounts: [{username:"hackerguy1"}]
+ *       createdAt: 1438737438578,
+ *       updatedAt:1438737438578
  *     }
  *
  */

@@ -9,7 +9,8 @@ var w = require('../lib/mongoPromise');
 var User = require('../models/user').User;
 
 /**
- * @api {get} /users Get Users List
+ * @api {get} /users Get User(s)
+ * @apiDescription Get list of users
  * @apiName GetUser
  * @apiGroup User
  *
@@ -20,9 +21,10 @@ var User = require('../models/user').User;
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
+ *       "id":"189B7NV89374N4839"
  *       "name": "John",
  *       "title": "Doe",
- *     	 "role":"admin",
+ *     	 "role":"user",
  *     }
  *
  */
@@ -45,7 +47,8 @@ exports.get = function(req, res, next){
 	});
 };
 /**
- * @api {post} /users Add a new user
+ * @api {post} /users Add User
+ * @apiDescription Add a new user.
  * @apiName AddUser
  * @apiGroup User
  *
@@ -61,16 +64,17 @@ exports.get = function(req, res, next){
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
+ *       "id":"189B7NV89374N4839"
  *       "name": "John",
  *       "title": "Doe",
- *     	 "role":"admin",
+ *     	 "role":"user",
  *     }
  *
  */
 exports.add = function(req, res, next){
 	//Query for existing user with same _id
 	var query = User.findOne({"username":req.body.username}); // find using username field
-	
+
 	var query;
 	if(!_.has(req.body, "username") && !_.has(req.body, "email")){
 		res.status(400).json({code:400, message:"Username or Email required to add a new user"});
@@ -96,7 +100,8 @@ exports.add = function(req, res, next){
 	});
 };
 /**
- * @api {put} /users Update a user
+ * @api {put} /users Update User
+ * @apiDescription Update a user.
  * @apiName UpdateUser
  * @apiGroup User
  *
@@ -111,9 +116,10 @@ exports.add = function(req, res, next){
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
+ *       "id":"189B7NV89374N4839"
  *       "name": "John",
  *       "title": "Doe",
- *     	 "role":"admin",
+ *     	 "role":"user",
  *     }
  *
  */
@@ -129,7 +135,8 @@ exports.update = function(req, res, next){
 	}
 };
 /**
- * @api {delete} /user/:id Delete a user
+ * @api {delete} /user/:id Delete User
+ * @apiDescription Delete a user.
  * @apiName DeleteUser
  * @apiGroup User
  *
@@ -140,9 +147,10 @@ exports.update = function(req, res, next){
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
+ *       "id":"189B7NV89374N4839"
  *       "name": "John",
  *       "title": "Doe",
- *     	 "role":"admin",
+ *       "role":"user",
  *     }
  *
  */

@@ -1,27 +1,71 @@
 /**
  * @description Application Controller
  */
+// ------------------------------------------------------------------------------------------
+// Current Errors.
+// ------------------------------------------------------------------------------------------
+/**
+ * @apiDefine CreateUserError
+ * @apiVersion 0.2.0
+ *
+ * @apiError NoAccessRight Only authenticated Admins can access the data.
+ * @apiError UserNameTooShort Minimum of 5 characters required.
+ *
+ * @apiErrorExample  Response (example):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "error": "UserNameTooShort"
+ *     }
+ */
 var Application = require('../models/application').Application;
 var mongoose = require('mongoose');
 var url = require('url');
 var _ = require('underscore');
 var q = require('q');
+
 /**
- * @api {get} /applications Get Applications list
+ * @api {get} /applications Get Application(s)
+ * @apiDescription Get a specific application's data or a list of applications.
  * @apiName GetApplication
  * @apiGroup Application
  *
- * @apiParam {String} name Name of Application
+ * @apiParam {String} [name] Name of Application.
  *
- * @apiSuccess {Object} applicationData Object containing applications data.
+ * @apiSuccess {object} applicationData Object containing applications data if <code>name</code> param is provided
+ * @apiSuccess {array} applications Array of applications if <code>name</code> is not provided.
  *
- * @apiSuccessExample Success-Response:
+
+ * @apiSuccessExample Success-Response (No Name Provided):
+ *     HTTP/1.1 200 OK
+ *     [
+ *      {
+ *       name: "exampleApp",
+ *       owner: {username:"hackerguy1", email:"test@test.com", name:"John Doe"},
+ *       frontend:{bucketName:"hypercube-exampleApp", provider:"Amazon", siteUrl:"hypercube-exampleApp.s3website.com"},
+ *       createdAt:1438737438578,
+ *       updatedAt:1438737438578
+ *      },
+ *       name: "testApp",
+ *       owner: {username:"hackerguy1", email:"test@test.com", name:"John Doe"},
+ *       frontend:{bucketName:"hypercube-testApp", provider:"Amazon", siteUrl:"hypercube-testApp.s3website.com"},
+ *       createdAt:1438737438578,
+ *       updatedAt:1438737438578
+ *      }
+ *     ]
+ * @apiSuccessExample Success-Response (Name Provided):
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {username:"Doe"}
+ *       name: "exampleApp",
+ *       owner: {username:"hackerguy1", email:"test@test.com", name:"John Doe"},
+ *       frontend:{bucketName:"hypercube-exampleApp", provider:"Amazon", siteUrl:"hypercube-exampleApp.s3website.com"},
+ *       createdAt:1438737438578,
+ *       updatedAt:1438737438578
  *     }
- *
+ * @apiErrorExample  Error-Response (Not Found):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "message":"Application not found."
+ *     }
  */
 exports.get = function(req, res, next){
 	var isList = true;
@@ -41,21 +85,31 @@ exports.get = function(req, res, next){
 };
 
 /**
- * @api {post} /applications Add a new application
+ * @api {post} /applications Add Application
+ * @apiDescription Add a new application.
  * @apiName AddApplication
  * @apiGroup Application
  *
  * @apiParam {String} name Name of application
+ * @apiParam {String} [template] Template to use when creating the application. Default template is used if no template provided
  *
  * @apiSuccess {Object} applicationData Object containing newly created applications data.
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {username:"Doe"}
+ *       name: "exampleApp",
+ *       owner: {username:"hackerguy1", email:"test@test.com", name:"John Doe"},
+ *       frontend:{bucketName:"hypercube-exampleApp", provider:"Amazon", siteUrl:"hypercube-exampleApp.s3website.com"},
+ *       createdAt:1438737438578,
+ *       updatedAt:1438737438578
  *     }
  *
+ * @apiErrorExample  Error-Response (Already Exists):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "message":"Application by that name already exists."
+ *     }
  *
  */
 exports.add = function(req, res, next){
@@ -102,7 +156,8 @@ exports.add = function(req, res, next){
 };
 
 /**
- * @api {put} /applications Update a application
+ * @api {put} /applications Update Application
+ * @apiDescription Update an application.
  * @apiName UpdateApplication
  * @apiGroup Application
  *
@@ -115,10 +170,17 @@ exports.add = function(req, res, next){
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {username:"Doe"}
+ *       name: "exampleApp",
+ *       owner: {username:"hackerguy1", email:"test@test.com", name:"John Doe"},
+ *       frontend:{bucketName:"hypercube-exampleApp", provider:"Amazon", siteUrl:"hypercube-exampleApp.s3website.com"},
+ *       createdAt:1438737438578,
+ *       updatedAt:1438737438578
  *     }
- *
+ * @apiErrorExample  Error-Response (Not Found):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "message":"Application not found."
+ *     }
  *
  */
 exports.update = function(req, res, next){
@@ -127,7 +189,7 @@ exports.update = function(req, res, next){
 		Application.update({name:req.params.name}, req.body, {upsert:false}, function (err, numberAffected, result) {
 			if (err) { return next(err); }
 			//TODO: respond with updated data instead of passing through req.body
-			
+
 			console.log('Application update successful. Num affected:', numberAffected);
 			if(numberAffected.nModified == 0 || numberAffected.n == 0){
 				//TODO: Handle Application not found
@@ -142,7 +204,8 @@ exports.update = function(req, res, next){
 };
 
 /**
- * @api {delete} /application/:id Delete an application
+ * @api {delete} /application/:id Delete Application
+ * @apiDescription Delete an application.
  * @apiName DeleteApplication
  * @apiGroup Application
  *
@@ -153,19 +216,26 @@ exports.update = function(req, res, next){
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {username:"Doe"}
+ *       name: "exampleApp",
+ *       owner: {username:"hackerguy1", email:"test@test.com", name:"John Doe"},
+ *       frontend:{bucketName:"hypercube-exampleApp", provider:"Amazon", siteUrl:"hypercube-exampleApp.s3website.com"},
+ *       createdAt:1438737438578,
+ *       updatedAt:1438737438578
  *     }
  *
+ * @apiErrorExample  Error-Response (Not Found):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "message":"Application not found."
+ *     }
  *
  */
 exports.delete = function(req, res, next){
-	console.log('delete request:', req.params);
 	var query = Application.findOneAndRemove({'name':req.params.name}); // find and delete using id field
 	query.exec(function (err, result){
 		if (err) { return next(err); }
 		if (!result) {
-			console.log('no result');
+			console.log('Application found to delete');
 			return next(new Error('Application could not be deleted.'));
 		}
 		var app = new Application(result);
@@ -179,25 +249,34 @@ exports.delete = function(req, res, next){
 
 
 /**
- * @api {put} /applications/:name/  Update a application
+ * @api {put} /applications/:name/files  Get Files
+ * @apiDescription Get the list of files for a specific application.
  * @apiName Files
  * @apiGroup Application
  *
- * @apiParam {String} name Name of application to get files for
+ * @apiParam {File} file1 File to upload. Key (<code>file1</code>) does not hold significance as all files are uploaded.
+ * @apiParam {File} file2 Second File to upload. Again, Key (<code>file2</code>) does not hold significance as all files are uploaded.
  *
  * @apiSuccess {Object} applicationData Object containing updated applications data.
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {username:"Doe"}
+ *       name: "exampleApp",
+ *       owner: {username:"hackerguy1", email:"test@test.com", name:"John Doe"},
+ *       frontend:{bucketName:"hypercube-exampleApp", provider:"Amazon", siteUrl:"hypercube-exampleApp.s3website.com"},
+ *       createdAt:1438737438578,
+ *       updatedAt:1438737438578
  *     }
  *
+ * @apiErrorExample  Error-Response (Not Found):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "message":"Application not found."
+ *     }
  *
  */
 exports.files = function(req, res, next){
-	console.log('file upload request with app name: ' + req.params.name + ' with body:', req.body);
 	//TODO: Check that user is owner or collaborator before uploading
 	//TODO: Lookup application and run uploadFile function
 	if(req.params.name){ //Get data for a specific application
@@ -222,7 +301,8 @@ exports.files = function(req, res, next){
 };
 
 /**
- * @api {put} /applications/:name/  Update a application
+ * @api {put} /applications/:name/publish  Publish File
+ * @apiDescription Publish/Upload a specified file to the storage/hosting for application matching the name provided.
  * @apiName UploadFile
  * @apiGroup Application
  *
@@ -235,10 +315,18 @@ exports.files = function(req, res, next){
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {username:"Doe"}
+ *       name: "exampleApp",
+ *       owner: {username:"hackerguy1", email:"test@test.com", name:"John Doe"},
+ *       frontend:{bucketName:"hypercube-exampleApp", provider:"Amazon", siteUrl:"hypercube-exampleApp.s3website.com"},
+ *       createdAt:1438737438578,
+ *       updatedAt:1438737438578
  *     }
  *
+ * @apiErrorExample  Error-Response (Not Found):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "message":"Application not found."
+ *     }
  *
  */
  var localDir = "./public";
@@ -270,21 +358,30 @@ exports.publishFile = function(req, res, next){
 };
 
 /**
- * @api {put} /applications/:name/  Update a application
+ * @api {put} /applications/:name/template  Apply Template
+ * @apiDescription Apply a template to the application matching the name provided.
  * @apiName applyTemplate
  * @apiGroup Application
  *
  * @apiParam {String} name Name of template
  *
- * @apiSuccess {Object} applicationData Object containing updated applications data.
+ * @apiSuccess {Object} applicationData Object containing application's data.
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {username:"Doe"}
+ *       name: "exampleApp",
+ *       owner: {username:"hackerguy1", email:"test@test.com", name:"John Doe"},
+ *       frontend:{bucketName:"hypercube-exampleApp", provider:"Amazon", siteUrl:"hypercube-exampleApp.s3website.com"},
+ *       createdAt:1438737438578,
+ *       updatedAt:1438737438578
  *     }
  *
+ * @apiErrorExample  Error-Response (Not Found):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "message":"Application not found."
+ *     }
  *
  */
  //TODO: Allow for deleteing/not deleteing all of the bucket files before applying template
@@ -315,19 +412,26 @@ exports.applyTemplate = function(req, res, next){
 };
 
 /**
- * @api {put} /applications/:name/  Update a application
+ * @api {put} /applications/:name/storage  Add File Storage
+ * @apiDescription Add File Storage + Hosting to the application matching the name provided. Currently handled with Amazon's S3.
  * @apiName applyTemplate
  * @apiGroup Application
- *
- * @apiParam {String} name Name of template
  *
  * @apiSuccess {Object} applicationData Object containing updated applications data.
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "App1",
- *       "owner": {username:"Doe"}
+ *       name: "exampleApp",
+ *       owner: {username:"hackerguy1", email:"test@test.com", name:"John Doe"},
+ *       frontend:{bucketName:"hypercube-exampleApp", provider:"Amazon", siteUrl:"hypercube-exampleApp.s3website.com"},
+ *       createdAt:1438737438578,
+ *       updatedAt:1438737438578
+ *     }
+ * @apiErrorExample  Error-Response (Not Found):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "message":"Application not found."
  *     }
  *
  *
@@ -339,7 +443,6 @@ exports.addStorage = function(req, res, next){
 	//TODO: Lookup application and run uploadFile function
 	if(req.params.name){ //Get data for a specific application
 		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
-		isList = false;
 		query.exec(function (err, foundApp){
 			if(err) { return next(err);}
 			if(!foundApp){
@@ -351,7 +454,7 @@ exports.addStorage = function(req, res, next){
 				res.send(webUrl);
 			}, function (err){
 				console.log('Error adding storage to application:', JSON.stringify(err));
-				res.status(400).send(err);
+				res.status(500).send(err);
 			});
 		});
 	} else {

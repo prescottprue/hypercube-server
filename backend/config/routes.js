@@ -183,7 +183,7 @@ module.exports =  {
 		},
 		{
 			type:'DELETE',
-			endpoint: '/admin/buckets/:name',
+			endpoint: '/admin/buckets',
 			controller:adminCtrl.deleteBucket
 		}
 	]

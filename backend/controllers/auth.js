@@ -8,14 +8,15 @@ var _ = require('underscore');
 var User = require('../models/user').User;
 var Session = require('../models/session').Session;
 
-
 /**
- * @api {post} /signup Sign up a new user and start a session as that new user
+ * @api {post} /signup Sign Up
+ * @apiDescription Sign up a new user and start a session as that new user
  * @apiName Signup
  * @apiGroup Auth
  *
  * @apiParam {Number} id Users unique ID.
  * @apiParam {String} username Username of user to signup as.
+ * @apiParam {String} [title] Title of user to signup as.
  * @apiParam {String} email Email of user to signup as.
  * @apiParam {String} password Password of user to signup as.
  *
@@ -62,13 +63,14 @@ exports.signup = function(req, res, next){
 };
 
 /**
- * @api {post} /login Login and start a new session
+ * @api {post} /login Login
+ * @apiDescription Login and start a new session.
  * @apiName Login
  * @apiGroup Auth
  *
  * @apiParam {Number} id Users unique ID.
- * @apiParam {String} username Username of user to login as.
- * @apiParam {String} email Email of user to login as.
+ * @apiParam {String} username Username of user to login as. Email must be provided if username is not.
+ * @apiParam {String} [email] Email of user to login as. Can be used instead of username.
  * @apiParam {String} password Password of user to login as.
  *
  * @apiSuccess {Object} userData Object containing users data.
@@ -76,9 +78,12 @@ exports.signup = function(req, res, next){
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "John",
- *       "title": "Doe",
- *     	 "role":"admin",
+ *       name: "John Doe",
+ *       username:"hackerguy1",
+ *       title: "Front End Developer",
+ *       role:"admin",
+ *       createdAt:1438737438578
+ *       updatedAt:1438737438578
  *     }
  *
  */
@@ -93,7 +98,7 @@ exports.login = function(req, res, next){
 			query = User.findOne({"email":req.body.email}); // find using email field
 		}
 		query.exec(function (err, currentUser){
-			if(err) { 
+			if(err) {
 				console.error('[AuthCtrl.login] Login error:', err);
 				return next(err);
 			}
@@ -114,7 +119,8 @@ exports.login = function(req, res, next){
 };
 
 /**
- * @api {post} /logout Logout and invalidate token
+ * @api {post} /logout Logout
+ * @apiDescription Logout the currently logged in user and invalidate their token.
  * @apiName Logout
  * @apiGroup Auth
  *
@@ -141,7 +147,8 @@ exports.logout = function(req, res, next){
 };
 
 /**
- * @api {put} /verify Verify token and get user data
+ * @api {put} /verify Verify
+ * @apiDescription Verify token and get matching user's data.
  * @apiName Verify
  * @apiGroup Auth
  *
@@ -150,9 +157,12 @@ exports.logout = function(req, res, next){
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
  *     {
- *       "name": "John",
- *       "title": "Doe",
- *     	 "role":"admin",
+ *       name: "John Doe",
+ *       username:"hackerguy1",
+ *       title: "Front End Developer",
+ *       role:"admin",
+ *       createdAt:1438737438578
+ *       updatedAt:1438737438578
  *     }
  *
  */

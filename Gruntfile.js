@@ -4,7 +4,6 @@ module.exports = function(grunt){
 	var frontFolder = "public/";
 	var mongoShutdownCmd = "db.getSiblingDB('admin').shutdownServer()";
 	var dbShutdownCmd = 'mongo --eval "' + mongoShutdownCmd + '"';
-	console.log('shutdowncmd:', dbShutdownCmd);
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		concurrent:{
@@ -15,6 +14,10 @@ module.exports = function(grunt){
 			server:{
 				files:['Gruntfile.js', 'config/**', serverFolder + 'lib/**', serverFolder + 'controllers/**'],
 				tasks:['nodemon']
+			},
+			docs:{
+				files:[serverFolder + 'controllers/*.js'],
+				tasks:['docs']
 			}
 		},
 		nodemon:{
@@ -32,7 +35,7 @@ module.exports = function(grunt){
 		},
 		apidoc: {
 			app:{
-				src: serverFolder+ "controllers",
+				src: serverFolder+ "/controllers",
 	    	dest: frontFolder + "docs/",
 	    	options:{
 	    		debug:true
@@ -55,7 +58,7 @@ module.exports = function(grunt){
       	command: 'mongod --dbpath /data/db',
       	options: {
           async: true,
-          stdout: false,
+          stdout: true,
           stderr: true,
           failOnError: true,
           execOptions: {

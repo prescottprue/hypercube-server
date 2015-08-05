@@ -7,7 +7,8 @@ var url = require('url');
 var _ = require('underscore');
 var q = require('q');
 /**
- * @api {get} /templates Get Templates list
+ * @api {get} /templates Get Template(s)
+ * @apiDescription Get a list of the templates or get a specific template.
  * @apiName GetTemplate
  * @apiGroup Template
  *
@@ -41,7 +42,8 @@ exports.get = function(req, res, next){
 };
 
 /**
- * @api {post} /templates Add a new template
+ * @api {post} /templates Add Template
+ * @apiDescription Add a new template.
  * @apiName AddTemplate
  * @apiGroup Template
  *
@@ -98,7 +100,8 @@ exports.add = function(req, res, next){
 };
 
 /**
- * @api {put} /templates Update a template
+ * @api {put} /templates Update Template
+ * @apiDescription Update a template.
  * @apiName UpdateTemplate
  * @apiGroup Template
  *
@@ -135,13 +138,13 @@ exports.update = function(req, res, next){
 	}
 };
 /**
- * @api {put} /templates/:name/upload Update a template
+ * @api {put} /templates/:name/upload Upload Files
+ * @apiDescription Upload files to a template
  * @apiName Upload
  * @apiGroup Template
  *
- * @apiParam {String} name Name of template
- * @apiParam {Object} owner Owner of template
- * @apiParam {String} owner.username Template owner's username
+ * @apiParam {File} file1 File to upload. Key (<code>file1</code>) does not hold significance as all files are uploaded.
+ * @apiParam {File} file2 Second File to upload. Again, Key (<code>file2</code>) does not hold significance as all files are uploaded.
  *
  * @apiSuccess {Object} templateData Object containing updated templates data.
  *
@@ -172,11 +175,12 @@ exports.upload = function(req, res, next){
 	}
 };
 /**
- * @api {delete} /delete/:id Delete an delete
+ * @api {delete} /templates Delete Template
+ * @apiDescription Delete a template
  * @apiName DeleteTemplate
  * @apiGroup Template
  *
- * @apiParam {String} name Name of delete
+ * @apiParam {String} name Name of template to delete
  *
  * @apiSuccess {Object} templateData Object containing deleted templates data.
  *
@@ -191,13 +195,17 @@ exports.upload = function(req, res, next){
  */
 exports.delete = function(req, res, next){
 	console.log('delete request:', req.params);
-	var query = Template.findOneAndRemove({'name':req.params.name}); // find and delete using id field
-	query.exec(function (err, result){
-		if (err) { return next(err); }
-		if (!result) {
-			console.log('no result');
-			return next(new Error('Template does not exist.'));
-		}
-			res.json(result);
-	});
+	if(!_.has(req.body, 'name')){
+		res.status(400).send('Template name required to delete template.');
+	} else {
+		var query = Template.findOneAndRemove({'name':req.body.name}); // find and delete using id field
+		query.exec(function (err, result){
+			if (err) { return next(err); }
+			if (!result) {
+				console.log('no result');
+				return next(new Error('Template does not exist.'));
+			}
+				res.json(result);
+		});
+	}
 };
