@@ -67,7 +67,7 @@ exports.add = function(req, res, next){
 		console.log('add request with name: ' + req.body.name + ' with body:', req.body);
 		var appData = _.extend({}, req.body);
 		if(!_.has(appData, 'author')){
-			console.log('No author provided. Using user', req.user);
+			// console.log('No author provided. Using user', req.user);
 			appData.author = req.user.userId;
 		}
 		var query = Template.findOne({"name":req.body.name}); // find using name field

@@ -283,16 +283,18 @@ exports.files = function(req, res, next){
 		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
 		isList = false;
 		query.exec(function (err, foundApp){
-			if(err) { return next(err);}
-			if(!foundApp){
-				return next (new Error('Application could not be found'));
+			if(err) {
+				console.log('[applicationCtrl.files()] Error finding application:', err);
+				return res.status(500).send('Server Error. Please Try Again.');
 			}
-			console.log('foundApp:', foundApp);
+			if(!foundApp){
+				return res.status(400).send('Application could not be found');
+			}
 			foundApp.getStructure().then(function (appFiles){
-				console.log('appFiles returned:', appFiles);
 				res.send(appFiles);
 			}, function (err){
-				res.status(400).send('Error saving file:', err);
+				console.log('[applicationCtrl.files()] Error saving file:', err);
+				res.status(500).send('Error saving file:', err);
 			});
 		});
 	} else {
@@ -303,7 +305,7 @@ exports.files = function(req, res, next){
 /**
  * @api {put} /applications/:name/publish  Publish File
  * @apiDescription Publish/Upload a specified file to the storage/hosting for application matching the name provided.
- * @apiName UploadFile
+ * @apiName Upload
  * @apiGroup Application
  *
  * @apiParam {String} name Name of
@@ -338,9 +340,12 @@ exports.publishFile = function(req, res, next){
 		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
 		isList = false;
 		query.exec(function (err, foundApp){
-			if(err) { return next(err);}
+			if(err) {
+				console.log('[applicationCtrl.publishFile()] Error finding application:', err);
+				return res.status(500).send('Server Error. Please Try Again.');
+			}
 			if(!foundApp){
-				return next (new Error('Application could not be found'));
+				return res.status(400).send('Application could not be found');
 			}
 			console.log('foundApp:', foundApp);
 			//TODO: Get url from found app, and get localDir from
