@@ -5,6 +5,8 @@ var q = require('q');
 var _ = require('underscore');
 var sqs = require('./../lib/sqs');
 
+var User = require('./user').User;
+
 var ApplicationSchema = new mongoose.Schema({
 	owner:{type: mongoose.Schema.Types.ObjectId, ref:'User'},
 	name:{type:String, default:'', unique:true, index:true},
@@ -43,6 +45,23 @@ ApplicationSchema.methods = {
 				d.reject(Error('Application could not be saved.'));
 			}
 			d.resolve(newApplication);
+		});
+		return d.promise;
+	},
+	findPromise:function(){
+		var d = q.defer();
+		var query = Application.findOne({name:appName}).populate({path:'owner', select:'username name title email'});
+		query.exec(function (err, foundApp){
+			if(err) { 
+				console.error('[Application.findPromise()] Error finding application:', JSON.stringify(err));
+				d.reject();
+				return res.status(500).send('Error applying template to Application.');
+			} else if(!foundApp){
+				console.error('[Application.findPromise()] Application not found.');
+				return res.status(400).send('Application could not be found.');
+			} else {
+				d.resolve(foundApp);
+			}
 		});
 		return d.promise;
 	},
@@ -150,9 +169,62 @@ ApplicationSchema.methods = {
 	},
 	getStructure:function(){
 		return fileStorage.getFiles(this.frontend.bucketName);
+	},
+	addCollaborators:function(usersArray){
+		var self = this;
+		var userPromises = [];
+		//TODO: Check to see if user exists and is already a collaborator before adding
+		if(usersArray && _.isArray(usersArray)){
+			usersArray.forEach(function (user){
+				var d = q.defer();
+				userPromises.push(d);
+				findUser(user).then(function (foundUser){
+					console.log('[Application.addCollaborators()] Found collaborator:', foundUser);
+					//Add User's ObjectID to application's collaborators
+					self.collaborators.push(foundUser._id);
+					d.resolve(foundUser);
+				}, function (err){
+					console.error('[Application.addCollaborators()] Error finding user:', user);
+					d.reject(err);
+				});
+			});
+		}
+		//Add save promise to end of promises list
+		return q.all(userPromises).then(function (usersArray){
+			console.log('collaborators all found:', usersArray);
+			return self.saveNew();
+		}, function(err){
+			console.error('Error with userPromises', err);
+			return;
+		});
 	}
 };
-
+function findUser(find){
+	var d = q.defer();
+	var findObj = {};
+	if(_.isString(find)){
+		//Assume username
+		findObj = {username:find};
+	} else if(_.isNumber()){
+		//Assume find is objectId
+		findObj._id = find;
+	} else {
+		//Assume find is object
+		findObj = find;
+	}
+	User.find(findObj).exec(function (err, foundUser){
+		if(err) {
+			console.error('Error finding user:', user);
+			d.reject({message:'Error Adding collaborator.', error:err});
+		} else if(!foundUser){
+			console.error('User could not be found:', user);
+			d.reject({message:'User could not be found', user:user});
+		} else {
+			d.resolve(foundUser);
+		}
+	});
+	return d.promise;
+}
 /*
  * Construct `User` model from `UserSchema`
  */

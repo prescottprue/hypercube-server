@@ -76,9 +76,13 @@ exports.get = function(req, res, next){
 		isList = false;
 	}
 	query.exec(function (err, result){
-		if(err) { return next(err);}
+		if(err){
+			console.error('[ApplicationsCtrl.get()] Error getting application(s):', JSON.stringify(err));
+			return res.status(500).send('Error getting Application(s).');
+		}
 		if(!result){
-			return next (new Error('Application could not be found'));
+			console.error('[ApplicationsCtrl.get()] Error finding application(s).');
+			return res.status(400).send('Application(s) could not be found.');
 		}
 		res.send(result);
 	});
@@ -125,13 +129,18 @@ exports.add = function(req, res, next){
 		}
 		var query = Application.findOne({"name":req.body.name}); // find using name field
 		query.exec(function (qErr, qResult){
-			if (qErr) { return next(qErr); }
-			if(qResult){ //Matching application already exists
-				return next(new Error('Application with this name already exists.'));
+			if(qErr){
+				console.error('[ApplicationsCtrl.add()] Error getting application:', JSON.stringify(qErr));
+				return res.status(500).send('Error Adding Application.');
+			}
+			if(qResult){
+				console.error('[ApplicationsCtrl.add()] Application already exists:', qResult);
+				return res.status(400).send('Application with this name already exists.');
 			}
 			//application does not already exist
 			var application = new Application(appData);
-			console.log('about to call create with storage:', appData);
+			// console.log('about to call create with storage:', appData);
+			//Create with template if one is provided
 			if(_.has(req.body,'template')){
 				application.createWithTemplate(req.body.template).then(function (newApp){
 					console.log('Application created with template:', newApp);
@@ -187,9 +196,11 @@ exports.update = function(req, res, next){
 	console.log('app update request with name: ' + req.params.name + ' with body:', req.body);
 	if(req.params.name){
 		Application.update({name:req.params.name}, req.body, {upsert:false}, function (err, numberAffected, result) {
-			if (err) { return next(err); }
+			if(err){
+				console.error('[ApplicationsCtrl.update()] Error getting application:', JSON.stringify(err));
+				return res.status(500).send('Error updating Application.');
+			}
 			//TODO: respond with updated data instead of passing through req.body
-
 			console.log('Application update successful. Num affected:', numberAffected);
 			if(numberAffected.nModified == 0 || numberAffected.n == 0){
 				//TODO: Handle Application not found
@@ -233,10 +244,13 @@ exports.update = function(req, res, next){
 exports.delete = function(req, res, next){
 	var query = Application.findOneAndRemove({'name':req.params.name}); // find and delete using id field
 	query.exec(function (err, result){
-		if (err) { return next(err); }
-		if (!result) {
-			console.log('Application found to delete');
-			return next(new Error('Application could not be deleted.'));
+		if(err){
+			console.error('[ApplicationsCtrl.delete()] Error getting application:', JSON.stringify(err));
+			return res.status(500).send('Error deleting Application.');
+		}
+		if(!foundApp){
+			console.error('[ApplicationsCtrl.delete()] Error finding application');
+			return res.status(400).send('Application could not be found.');
 		}
 		var app = new Application(result);
 		app.removeStorage().then(function(){
@@ -281,13 +295,15 @@ exports.files = function(req, res, next){
 	//TODO: Lookup application and run uploadFile function
 	if(req.params.name){ //Get data for a specific application
 		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
-		isList = false;
 		query.exec(function (err, foundApp){
-			if(err) { return next(err);}
-			if(!foundApp){
-				return next (new Error('Application could not be found'));
+			if(err){
+				console.error('[ApplicationsCtrl.files()] Error getting application:', JSON.stringify(err));
+				return res.status(500).send('Error getting Application files.');
 			}
-			console.log('foundApp:', foundApp);
+			if(!foundApp){
+				console.error('[ApplicationsCtrl.files()] Error finding application');
+				return res.status(400).send('Application could not be found.');
+			}
 			foundApp.getStructure().then(function (appFiles){
 				console.log('appFiles returned:', appFiles);
 				res.send(appFiles);
@@ -338,11 +354,14 @@ exports.publishFile = function(req, res, next){
 		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
 		isList = false;
 		query.exec(function (err, foundApp){
-			if(err) { return next(err);}
-			if(!foundApp){
-				return next (new Error('Application could not be found'));
+			if(err) {
+				console.error('[ApplicationsCtrl.publishFile()] Error getting application:', JSON.stringify(err));
+				return res.status(500).send('Error publishing file to Application.');
 			}
-			console.log('foundApp:', foundApp);
+			if(!foundApp){
+				console.error('[ApplicationsCtrl.publishFile()] Error finding application');
+				return res.status(400).send('Application could not be found.');
+			}
 			//TODO: Get url from found app, and get localDir from
 			foundApp.publishFile({content:req.body.content, key:req.body.key, contentType:req.body.contentType}).then(function (webUrl){
 				console.log('Buckets web url:', webUrl);
@@ -391,11 +410,14 @@ exports.applyTemplate = function(req, res, next){
 	//TODO: Lookup application and run uploadFile function
 	if(req.params.name){ //Get data for a specific application
 		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
-		isList = false;
 		query.exec(function (err, foundApp){
-			if(err) { return next(err);}
+			if(err) { 
+				console.error('[ApplicationsCtrl.applyTemplate()] Error getting application:', JSON.stringify(err));
+				return res.status(500).send('Error applying template to Application.');
+			}
 			if(!foundApp){
-				return next (new Error('Application could not be found'));
+				console.error('[ApplicationsCtrl.applyTemplate()] Error finding application');
+				return res.status(400).send('Application could not be found.');
 			}
 			//TODO: Get url from found app, and get localDir from
 			foundApp.applyTemplate(req.body.name).then(function (webUrl){
@@ -414,7 +436,7 @@ exports.applyTemplate = function(req, res, next){
 /**
  * @api {put} /applications/:name/storage  Add File Storage
  * @apiDescription Add File Storage + Hosting to the application matching the name provided. Currently handled with Amazon's S3.
- * @apiName applyTemplate
+ * @apiName addStorage
  * @apiGroup Application
  *
  * @apiSuccess {Object} applicationData Object containing updated applications data.
@@ -444,9 +466,13 @@ exports.addStorage = function(req, res, next){
 	if(req.params.name){ //Get data for a specific application
 		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
 		query.exec(function (err, foundApp){
-			if(err) { return next(err);}
+			if(err) { 
+				console.error('[ApplicationsCtrl.addStorage()] Error getting application:', JSON.stringify(err));
+				return res.status(500).send('Error adding storage to application.');
+			}
 			if(!foundApp){
-				return next (new Error('Application could not be found'));
+				console.error('[ApplicationsCtrl.addStorage()] Error finding application.');
+				return res.status(400).send('Application could not be found');
 			}
 			//TODO: Get url from found app, and get localDir from
 			foundApp.createStorage().then(function (webUrl){
@@ -459,5 +485,59 @@ exports.addStorage = function(req, res, next){
 		});
 	} else {
 		res.status(400).send('Application name and storage information are required to add storage');
+	}
+};
+
+/**
+ * @api {put} /applications/:name/collaborators  Add File Storage
+ * @apiDescription Add collaborators by providing their usernames
+ * @apiName addCollaborators
+ * @apiGroup Application
+ *
+ * @apiSuccess {Array} users Array containing usernames of users to add as collaborators
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       name: "exampleApp",
+ *       owner: {username:"hackerguy1", email:"test@test.com", name:"John Doe"},
+ *       frontend:{bucketName:"hypercube-exampleApp", provider:"Amazon", siteUrl:"hypercube-exampleApp.s3website.com"},
+ *       collaborators:[],
+ *       createdAt:1438737438578,
+ *       updatedAt:1438737438578
+ *     }
+ * @apiErrorExample  Error-Response (Not Found):
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "message":"Application not found."
+ *     }
+ *
+ *
+ */
+ //TODO: Allow for deleteing/not deleteing all of the bucket files before applying template
+exports.addCollaborators = function(req, res, next){
+	console.log('add storage request with app name: ' + req.params.name + ' with body:', req.body);
+	//TODO: Check that user is allowed to add collaborators
+	if(req.params.name && req.body.users){ //Get data for a specific application
+		var query = Application.findOne({name:req.params.name}).populate({path:'owner', select:'username name title email'});
+		query.exec(function (err, foundApp){
+			if(err) { 
+				console.error('[ApplicationsCtrl.addCollaborators()] Error getting application:', JSON.stringify(err));
+				return res.status(500).send('Error adding collaborators to application.');
+			}
+			if(!foundApp){
+				console.error('[ApplicationsCtrl.addCollaborators()] Error finding application:');
+				return res.status(400).send('Application could not be found');
+			}
+			foundApp.addCollaborators(req.body.users).then(function (appWithCollabs){
+				console.log('Added storage to application successfully:', appWithCollabs);
+				res.send(appWithCollabs);
+			}, function (err){
+				console.log('Error adding collaborators to application:', JSON.stringify(err));
+				res.status(500).send(err);
+			});
+		});
+	} else {
+		res.status(400).send('Application name and users array are required to add collaborators.');
 	}
 };

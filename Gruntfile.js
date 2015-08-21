@@ -29,8 +29,7 @@ module.exports = function(grunt){
 	        env:{
 	        	PORT:conf.port
 	        }
-        },
-
+        }
 			}
 		},
 		apidoc: {
