@@ -67,6 +67,11 @@ module.exports =  {
 			type:'DELETE',
 			endpoint: '/users/:username',
 			controller:userCtrls['delete']
+		},
+		{
+			type:'GET',
+			endpoint: '/users/search/:searchQuery',
+			controller:userCtrls.search
 		}
 	],
 	applications:[

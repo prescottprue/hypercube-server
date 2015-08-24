@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var url = require('url');
 var _ = require('underscore');
 var w = require('../lib/mongoPromise');
-
+var url = require('url');
 var User = require('../models/user').User;
 
 /**
@@ -22,29 +22,35 @@ var User = require('../models/user').User;
  *     HTTP/1.1 200 OK
  *     {
  *       "id":"189B7NV89374N4839"
- *       "name": "John",
+ *       "name": "John Doe",
  *       "title": "Doe",
+ *       "username": "john123",
+ *       "email": "john123@gmail.com",
  *     	 "role":"user",
  *     }
  *
  */
 exports.get = function(req, res, next){
 	var isList = true;
-	var query = User.find({});
+	var query = User.find({}, {username:1, email:1});
 	if(_.has(req.params, "username")){ //Get data for a specific user
 		console.log('user request with username:', req.params.username);
-		query = User.findOne({username:req.params.username});
+		query = User.findOne({username:req.params.username}, {password:0, __v:0});
 		isList = false;
 	}
-	w.runQuery(query).then(function(userData){
-		//Remove sensitiveuser data from user
-		if(!isList){
-			userData = userData.strip();
+	query.exec(function (err, result){
+		if(err) { res.status(500).send(err);}
+		if(!result){
+			res.status(500).send(null);
 		}
-		res.send(userData);
-	}, function(err){
-		res.status(500).send('User(s) Query error:', err);
+		res.send(result);
 	});
+	// w.runQuery(query).then(function(userData){
+	// 	//Remove sensitiveuser data from user
+	// 	res.send(userData);
+	// }, function(err){
+	// 	res.status(500).send('User(s) Query error:', err);
+	// });
 };
 /**
  * @api {post} /users Add User
@@ -167,3 +173,64 @@ exports.delete = function(req, res, next){
 		});
 	}
 };
+/**
+ * @api {delete} /user/:id Delete User
+ * @apiDescription Delete a user.
+ * @apiName DeleteUser
+ * @apiGroup User
+ *
+ * @apiParam {String} username Email of user
+ *
+ * @apiSuccess {Object} userData Object containing deleted users data.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "id":"189B7NV89374N4839"
+ *       "name": "John",
+ *       "title": "Doe",
+ *       "role":"user",
+ *     }
+ *
+ */
+exports.search = function(req, res, next){
+	// var urlParams = url.parse(req.url, true).query;
+	var usernameQuery = createUserQuery('username', req.params.searchQuery);
+	var emailQuery = createUserQuery('email', req.params.searchQuery);
+	//Search usernames
+	w.runQuery(usernameQuery).then(function(usernameResults){
+		if(_.isArray(usernameResults) && usernameResults.length == 0){
+			//Search emails
+			w.runQuery(emailQuery).then(function (emailResults){
+				console.log('User search by email resulted:', emailResults);
+				res.json(emailResults);
+			}, function (err){
+				res.status(500).send({message:'User cound not be found'});
+			});
+		} else {
+			console.log('User search by username resulted:', usernameResults);
+			res.json(usernameResults);
+		}
+	}, function (err){
+		console.error('User could not be found:', err);
+		res.status(500).send({message:'User cound not be found'});
+	});
+};
+/**
+ * Escape special characters
+ */
+function escapeRegExp(str) {
+    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+}
+/**
+ * Create a user query based on provided key and value
+ */
+function createUserQuery(key, val){
+	var queryArr = _.map(val.split(' '), function (q) {
+    var queryObj = {};
+    queryObj[key] = new RegExp(escapeRegExp(q), 'i');
+    return queryObj;
+  });
+  var find = {$or: queryArr};
+	return User.find(find, {email:1, name:1, username:1}); // find and delete using id field
+}
